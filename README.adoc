@@ -73,7 +73,7 @@ Programming community developed much better techniques than callback hell.
 ----
 TEST_CASE("MyGame.MyTest", "[ApplicationContextMask][ProductFilter]")
 {
-    REQUIRE(true == true);
+    REQUIRE(true);
 }
 ----
 
