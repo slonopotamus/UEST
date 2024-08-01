@@ -1,0 +1,138 @@
+= UEST (Unreal Engine Suckless Testing)
+
+This project aims to provide a testing framework for Unreal Engine that does not suck.
+
+== Analysis of existing Unreal Engine solutions
+
+As of 5.4, Unreal Engine has 4 (FOUR, that's not a typo) APIs for writing tests and all are very far from being good for various reasons.
+
+Let's analyze them one-by-one.
+
+=== Automation Test
+
+[source,cpp]
+----
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMyTest, "MyGame.MyTest", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+bool FMyTest::RunTest(const FString& Parameters)
+{
+    TestTrue(TEXT("True should be true"), true);
+
+    return true;
+}
+----
+
+.The good
+* VisualStudio and JetBrains Rider know how to run this.
+* `UTEST*` macros that interrupt test execution.
+
+.The bad
+* Assertions do not capture expression that is being tested.
+You have to write descriptive messages by hand.
+* Overcomplicated way to add multiple tests with common logic.
+`IMPLEMENT_COMPLEX_AUTOMATION_TEST` cannot be understood by IDEs at all.
+
+.The ugly
+* You need to write your test name *three times* as if it isn't clear enough what test name actually is.
+* Requires lots of typing.
+Macro could easily declare `RunTest` signature automatically.
+Also, almost nobody wants to use custom flags.
+* You must return a `bool` from the test.
+If test reports an error, it should be marked as failing.
+If there are no errors, it should be marked as successful.
+This bool adds a completely useless (and even harmful) way to *fail without a message*.
+* Nontrivial assertions (like `UTEST_EQUAL_EXPR`) are unable to print exact values of actual/expected.
+* Inadequate support for async tests.
+As soon as something becomes async test body transforms into `ADD_LATENT_AUTOMATION_COMMAND` monster without an easy way of passing data between commands.
+
+=== Automation Spec
+
+[source,cpp]
+----
+DEFINE_SPEC(MySpec, "MyGame.MySpec", EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
+void MyCustomSpec::Define()
+{
+    TestTrue(TEXT("True should be true"), true);
+}
+----
+
+.The good
+* Understood by VS and Rider
+* `void` return type
+* Better async execution support, but not the best.
+Programming community developed much better techniques than callback hell.
+* May attract people that are familiar with spec-based approach from other areas.
+
+.The ugly
+* Declaring test name three times again
+* Flags again
+* No builtin way to interrupt test execution when assertion fails
+
+=== Low Level
+
+[source,cpp]
+----
+TEST_CASE("MyGame.MyTest", "[ApplicationContextMask][ProductFilter]")
+{
+    REQUIRE(true == true);
+}
+----
+
+.The good
+* Test name is written only once...
+Well, no.
++
+--
+The caveat is that `TEST_CASE` macro used a broken way to generate unique class names.
+They collide across compilation units and you end up asking yourself "why my test doesn't register at all".
+So instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test name _twice_.
+--
+
+.The bad
+* Not understood by Rider
+
+.The ugly
+* String tags?
+I am more than sure people will make typos and spend multiple hours trying to figure out why their test doesn't run.
+* Assertions are a joke.
++
+--
+Just look at it:
+
+[source,cpp]
+----
+#define REQUIRE(Expr) if (!(Expr)) { FAutomationTestFramework::Get().GetCurrentTest()->AddError(TEXT("Required condition failed, interrupting test")); return; }
+----
+
+Yep, you guessed it right, all you will get for failed assertion is "Required condition failed, interrupting test"
+--
+
+=== CQTest
+
+[source,cpp]
+----
+TEST(MyTest, "MyGame")
+{
+    ASSERT_THAT(IsTrue(true));
+}
+----
+
+.The good
+* Test name is written only once
+* No more flags
+* `AreEqual` assertion is extensible and can print arbitrary types in error messages
+* `void` test body
+* Nice way to add multiple test methods to a single test class
+
+.The bad
+* Not understood by Rider (https://youtrack.jetbrains.com/issue/RSCPP-36039/Support-Unreal-Engine-CQTest-framework[RSCPP-36039].
+Not sure about VS, would not be surprised if situation is the same.
+* Async execution degraded to Automation Test style
+
+.The ugly
+* Assertions do not capture tested expression.
+`Expected condition to be true.`, seriously?
+* Inadequate way to add custom assertions.
+You need to use custom macros instead of `TEST` and `TEST_CLASS` because they hardcode `FNoDiscardAsserter`.
+And this framework claims they are about composition instead of inheritance!
+There was absolutely zero reason to tie test class to a _single_ asserter.
+Asserter could easily be absolutely external class to the test itself, see NUnit for example.
