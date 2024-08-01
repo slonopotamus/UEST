@@ -127,6 +127,7 @@ TEST(MyTest, "MyGame")
 * Not understood by Rider (https://youtrack.jetbrains.com/issue/RSCPP-36039/Support-Unreal-Engine-CQTest-framework)[RSCPP-36039]).
 Not sure about VS, would not be surprised if situation is the same.
 * Async execution degraded to Automation Test style
+* `clang-format` is unable to properly indent `TEST_CLASS` with nested `TEST_METHOD`
 
 .The ugly
 * Assertions do not capture tested expression.
