@@ -91,7 +91,7 @@ Instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test
 * Not understood by Rider (https://youtrack.jetbrains.com/issue/RIDER-110897[RIDER-110897])
 
 .The ugly
-* String tags?
+* String tags, really?
 I am more than sure people will make typos and spend multiple hours trying to figure out why their test doesn't run.
 * Assertions are a joke.
 +
