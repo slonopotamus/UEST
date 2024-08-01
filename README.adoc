@@ -23,7 +23,7 @@ bool FMyTest::RunTest(const FString& Parameters)
 
 .The good
 * VisualStudio and JetBrains Rider know how to run this.
-* `UTEST*` macros interrupt test execution.
+* `UTEST*` macros interrupt test execution (though these macros are useless for all other test frameworks because of non-void `return false;`)
 
 .The bad
 * Assertions do not capture expression that is being tested.
