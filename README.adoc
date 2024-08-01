@@ -65,7 +65,7 @@ Programming community developed much better techniques than callback hell.
 .The ugly
 * Declaring test name three times again
 * Flags again
-* No builtin way to interrupt test execution when assertion fails
+* No builtin way to interrupt test execution when assertion fails, so people have to invent their own assrtion macros.
 
 === Low Level
 
