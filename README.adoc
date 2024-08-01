@@ -42,7 +42,7 @@ If there are no errors, it should be marked as successful.
 This bool adds a completely useless (and even harmful) way to *fail without a message*.
 * Nontrivial assertions (like `UTEST_EQUAL_EXPR`) are unable to print exact values of actual/expected.
 * Inadequate support for async tests.
-As soon as something becomes async test body transforms into `ADD_LATENT_AUTOMATION_COMMAND` monster without an easy way of passing data between commands.
+As soon as something becomes async, test body transforms into `ADD_LATENT_AUTOMATION_COMMAND` monster without an easy way of passing data between commands.
 
 === Automation Spec
 
@@ -82,7 +82,7 @@ TEST_CASE("MyGame.MyTest", "[ApplicationContextMask][ProductFilter]")
 Well, no.
 +
 --
-The caveat is that `TEST_CASE` macro used a broken way to generate unique class names.
+The caveat is that `TEST_CASE` macro uses a broken way to generate unique class names.
 They collide across compilation units and namespaces, and you end up asking yourself "why my test doesn't register at all".
 Instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test name _twice_.
 --
