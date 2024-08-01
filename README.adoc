@@ -83,8 +83,8 @@ Well, no.
 +
 --
 The caveat is that `TEST_CASE` macro used a broken way to generate unique class names.
-They collide across compilation units and you end up asking yourself "why my test doesn't register at all".
-So instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test name _twice_.
+They collide across compilation units and namespaces, and you end up asking yourself "why my test doesn't register at all".
+Instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test name _twice_.
 --
 
 .The bad
