@@ -124,7 +124,7 @@ TEST(MyTest, "MyGame")
 * Nice way to add multiple test methods to a single test class
 
 .The bad
-* Not understood by Rider (https://youtrack.jetbrains.com/issue/RSCPP-36039/Support-Unreal-Engine-CQTest-framework)[RSCPP-36039].
+* Not understood by Rider (https://youtrack.jetbrains.com/issue/RSCPP-36039/Support-Unreal-Engine-CQTest-framework)[RSCPP-36039]).
 Not sure about VS, would not be surprised if situation is the same.
 * Async execution degraded to Automation Test style
 
