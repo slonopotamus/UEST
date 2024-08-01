@@ -15,7 +15,7 @@ Let's analyze them one-by-one.
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMyTest, "MyGame.MyTest", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 bool FMyTest::RunTest(const FString& Parameters)
 {
-    TestTrue(TEXT("True should be true"), true);
+    UTEST_TRUE_EXPR(true);
 
     return true;
 }
