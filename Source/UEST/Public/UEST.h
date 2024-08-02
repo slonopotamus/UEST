@@ -1,19 +1,104 @@
 ﻿#pragma once
 
+#include "Assert/CQTestConvert.h"
 #include "Misc/AutomationTest.h"
 
-// These asserts are just a stub
+template<typename T>
+struct IMatcher
+{
+	virtual ~IMatcher() = default;
 
-#define AssertThatMsgf(Expression, Message, ...) \
+	virtual bool Matches(const T& Value) const = 0;
+
+	virtual FString Describe() const = 0;
+};
+
+namespace Is
+{
+	template<typename T>
+	requires std::is_pointer_v<T>
+	struct Null final : IMatcher<T>
+	{
+		virtual bool Matches(const T& Value) const override
+		{
+			return Value != nullptr;
+		}
+
+		virtual FString Describe() const override
+		{
+			return TEXT("be nullptr");
+		}
+	};
+
+	template<typename T, typename M>
+	// TODO: Add requires
+	struct NotMatcher final : IMatcher<T>
+	{
+		M Matcher;
+
+		virtual bool Matches(const T& Value) const override
+		{
+			return !Matcher.Matches(Value);
+		}
+
+		virtual FString Describe() const override
+		{
+			return FString::Printf(TEXT("not %s"), *Matcher.Describe());
+		}
+	};
+
+	template<typename T>
+	requires std::same_as<T, bool>
+	struct True final : IMatcher<T>
+	{
+		virtual bool Matches(const T& Value) const override
+		{
+			return Value;
+		}
+
+		virtual FString Describe() const override
+		{
+			return TEXT("be true");
+		}
+	};
+
+	template<typename T>
+	requires std::same_as<T, bool>
+	struct False final : IMatcher<T>
+	{
+		virtual bool Matches(const T& Value) const override
+		{
+			return !Value;
+		}
+
+		virtual FString Describe() const override
+		{
+			return TEXT("be false");
+		}
+	};
+
+	namespace Not
+	{
+		template<typename T>
+		using Null = NotMatcher<T, Null<T>>;
+
+		template<typename T>
+		using True = False<T>;
+
+		template<typename T>
+		using False = True<T>;
+	}
+}
+
+#define ASSERT_THAT(Value, Matcher) \
 	do \
 	{ \
-		if (!ensureAlwaysMsgf((Expression), TEXT(Message), ##__VA_ARGS__)) \
+		Matcher<decltype(Value)> _Matcher; \
+		if (!ensureAlwaysMsgf(_Matcher.Matches(Value), TEXT("%s must %s"), *CQTestConvert::ToString(Value), *_Matcher.Describe())) \
 		{ \
 			return; \
 		} \
 	} while (false)
-
-#define ASSERT_THAT(Expression) AssertThatMsgf(Expression, "expected expression to be true")
 
 class UEST_API FUESTTestBase : public FAutomationTestBase
 {
@@ -41,7 +126,7 @@ struct FUESTMethodRegistrar
 {
 	FUESTMethodRegistrar(FString Name, FUESTTestBase& Test, FSimpleDelegate Delegate)
 	{
-		Test.TestMethods.Add(Name, Delegate);
+		Test.TestMethods.Add(MoveTemp(Name), MoveTemp(Delegate));
 	}
 };
 

@@ -16,5 +16,11 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "CQTest",
+			"Enabled": true
+		}
 	]
 }

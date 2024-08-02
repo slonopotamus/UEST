@@ -10,6 +10,7 @@ public class UEST : ModuleRules
 				"Boost",
 				"Core",
 				"CoreUObject",
+				"CQTest",
 				"Engine",
 			}
 		);
