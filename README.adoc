@@ -2,6 +2,50 @@
 
 This project aims to provide a testing framework for Unreal Engine that does not suck.
 
+== Goals
+
+* Simple things should be simple, complex things should be possible
+* Extensibility
+* Async execution support
+* IDE and CI first-class support
+
+== Usage
+
+.Simple test
+[source,cpp]
+----
+#include "UEST.h"
+
+TEST(MyFancyTest)
+{
+    // test body goes here
+    ASSERT_THAT(...);
+}
+----
+
+.Test class with multiple methods
+[source,cpp]
+----
+#include "UEST.h"
+
+TEST_CLASS(MyFancyTestClass)
+{
+    TEST_METHOD(Method1)
+    {
+        // test body goes here
+        ASSERT_THAT(...);
+    }
+
+    TEST_METHOD(Method2)
+    {
+        // test body goes here
+        ASSERT_THAT(...);
+    }
+
+    // put helper fields or methods here
+}
+----
+
 == Analysis of existing Unreal Engine solutions
 
 As of 5.4, Unreal Engine has 4 (FOUR, that's not a typo) APIs for writing tests and all are very far from being good for various reasons.
@@ -137,3 +181,5 @@ You need to use custom macros instead of `TEST` and `TEST_CLASS` because they ha
 And this framework claims they are about composition instead of inheritance!
 There was absolutely zero reason to tie test class to a _single_ asserter.
 Asserter could easily be absolutely external class to the test itself, see NUnit for example.
+
+// TODO: Write about AFunctionalTest, DaedalicTestAutomationPlugin, Gauntlet
