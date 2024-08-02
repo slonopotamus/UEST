@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "UEST",
 	"Description": "A testing framework that does not suck",
-	"Category": "",
+	"Category": "Testing",
 	"CreatedBy": "Marat Radchenko",
 	"CreatedByURL": "https://github.com/slonopotamus",
 	"DocsURL": "https://github.com/slonopotamus/UEST",
