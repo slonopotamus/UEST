@@ -1,5 +1,7 @@
 = UEST (Unreal Engine Suckless Testing)
 
+CAUTION: This is pre-alpha software, not ready for production!
+
 This project aims to provide a testing framework for Unreal Engine that does not suck.
 
 == Goals
