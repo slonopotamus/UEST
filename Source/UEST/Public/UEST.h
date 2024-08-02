@@ -34,11 +34,13 @@ protected:
 template<typename TClass>
 struct TUESTInstantiator
 {
+#if WITH_AUTOMATION_WORKER
 	TUESTInstantiator()
 	{
 		Instance = MakeUnique<TClass>();
 	}
 	TUniquePtr<TClass> Instance;
+#endif
 };
 
 #define TEST_CLASS_WITH_BASE(ClassName, BaseClass, PrettyName) \
