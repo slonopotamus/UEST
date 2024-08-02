@@ -1,6 +1,10 @@
 = UEST (Unreal Engine Suckless Testing)
 :icons: font
 
+ifdef::env-github[]
+:caution-caption: :fire:
+endif::[]
+
 CAUTION: This is pre-alpha software, not ready for production!
 
 This project aims to provide a testing framework for Unreal Engine that does not suck.
