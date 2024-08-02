@@ -43,20 +43,38 @@ struct TUESTInstantiator
 #endif
 };
 
-#define TEST_CLASS_WITH_BASE(ClassName, BaseClass, PrettyName) \
-	struct F##ClassName##Impl; \
-	struct F##ClassName : public BaseClass \
+// TODO: Get rid of Boost
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/comparison/greater.hpp>
+#include <boost/preprocessor/seq/elem.hpp>
+#include <boost/preprocessor/seq/fold_left.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/variadic/to_seq.hpp>
+
+#define UEST_CONCAT_SEQ_1(seq, op) BOOST_PP_SEQ_HEAD(seq)
+#define UEST_CONCAT_SEQ_N(seq, op) BOOST_PP_SEQ_FOLD_LEFT(op, BOOST_PP_SEQ_HEAD(seq), BOOST_PP_SEQ_TAIL(seq))
+#define UEST_CONCAT_SEQ(seq, op) BOOST_PP_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(seq), 1), UEST_CONCAT_SEQ_N, UEST_CONCAT_SEQ_1)(seq, op)
+
+#define UEST_PRETTY_NAME_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(., x))
+#define UEST_PRETTY_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_PRETTY_NAME_OP)
+
+#define UEST_CLASS_NAME_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
+#define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_OP)
+
+#define TEST_CLASS_WITH_BASE_IMPL(BaseClass, ClassName, PrettyName) \
+	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
+	struct BOOST_PP_CAT(F, ClassName) : public BaseClass \
 	{ \
 		typedef BaseClass Super; \
-		F##ClassName() \
-		    : Super(TEXT(#PrettyName)) \
+		BOOST_PP_CAT(F, ClassName)() \
+		    : Super(UE_MODULE_NAME "." BOOST_PP_STRINGIZE(PrettyName)) \
 		{ \
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
-			return TEXT(#PrettyName); \
+			return UE_MODULE_NAME "." BOOST_PP_STRINGIZE(PrettyName); \
 		} \
 		virtual FString GetTestSourceFileName() const override \
 		{ \
@@ -67,15 +85,17 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
-	static TUESTInstantiator<F##ClassName##Impl> ClassName##Instantiator; \
-	struct F##ClassName##Impl : public F##ClassName
+	static TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
+	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) : public BOOST_PP_CAT(F, ClassName)
 
-#define TEST_WITH_BASE(TestName, BaseClass, PrettyName) \
-	TEST_CLASS_WITH_BASE(TestName, BaseClass, PrettyName) \
+#define TEST_CLASS_WITH_BASE(BaseClass, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
+
+#define TEST_WITH_BASE(BaseClass, ...) \
+	TEST_CLASS_WITH_BASE(BaseClass, __VA_ARGS__) \
 	{ \
 		virtual void DoTest(const FString& Parameters) override; \
 	}; \
-	void F##TestName##Impl::DoTest(const FString& Parameters)
+	void BOOST_PP_CAT(BOOST_PP_CAT(F, UEST_CLASS_NAME(__VA_ARGS__)), Impl)::DoTest(const FString& Parameters)
 
 /**
  * Simple macro for a test.
@@ -87,8 +107,7 @@ struct TUESTInstantiator
  *     ASSERT_THAT(...);
  * }
  */
-// TODO: Add proper support for variadics
-#define TEST(...) TEST_WITH_BASE(__VA_ARGS__, FUESTTestBase, __VA_ARGS__)
+#define TEST(...) TEST_WITH_BASE(FUESTTestBase, __VA_ARGS__)
 
 /**
  * Declares a test class
@@ -111,9 +130,7 @@ struct TUESTInstantiator
  *     // You can put helper fields or methods here
  * }
  */
-// TODO: Add proper support for variadics
-#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(__VA_ARGS__, FUESTTestBase, __VA_ARGS__)
+#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, __VA_ARGS__)
 
-// TODO: Add proper support for variadics
 // TODO: This is just a stub, we need to register method in test class
 #define TEST_METHOD(MethodName) void MethodName()

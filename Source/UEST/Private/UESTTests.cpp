@@ -1,19 +1,37 @@
 ﻿#include "UEST.h"
 
-TEST_CLASS(UEST_TestClass)
+TEST_CLASS(TestClass)
 {
-    TEST_METHOD(Test1)
+	TEST_METHOD(Test1)
 	{
-        ASSERT_THAT(true);
+		ASSERT_THAT(true);
 	}
-	
+
 	TEST_METHOD(Test2)
 	{
-    	ASSERT_THAT(true);
+		ASSERT_THAT(true);
 	}
 };
 
-TEST(UEST_Test)
+TEST(Test)
 {
 	ASSERT_THAT(true);
 }
+
+TEST(Test, With, Deep, Naming)
+{
+	ASSERT_THAT(true);
+}
+
+TEST_CLASS(TestClass, With, Deep, Naming)
+{
+	TEST_METHOD(Test1)
+	{
+		ASSERT_THAT(true);
+	}
+
+	TEST_METHOD(Test2)
+	{
+		ASSERT_THAT(true);
+	}
+};
