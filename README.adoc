@@ -1,4 +1,5 @@
 = UEST (Unreal Engine Suckless Testing)
+:icons: font
 
 CAUTION: This is pre-alpha software, not ready for production!
 
@@ -128,9 +129,10 @@ TEST_CASE("MyGame.MyTest", "[ApplicationContextMask][ProductFilter]")
 Well, no.
 +
 --
-The caveat is that `TEST_CASE` macro uses a broken way to generate unique class names.
+The caveat is that `TEST_CASE` macro uses a very broken way to generate unique class names.
 They collide across compilation units and namespaces, and you end up asking yourself "why my test doesn't register at all".
 Instead, Epics tell users to use `TEST_CASE_NAMED`, where you need to write test name _twice_.
+That way, you end up with the same test class name collision chances as other approaches.
 --
 
 .The bad
@@ -172,7 +174,7 @@ TEST(MyTest, "MyGame")
 .The bad
 * Not understood by Rider (https://youtrack.jetbrains.com/issue/RSCPP-36039/Support-Unreal-Engine-CQTest-framework)[RSCPP-36039]).
 Not sure about VS, would not be surprised if situation is the same.
-* Async execution degraded to Automation Test style
+* Async execution is as bad as in Automation Test style
 * `clang-format` is unable to properly indent `TEST_CLASS` with nested `TEST_METHOD`
 
 .The ugly
