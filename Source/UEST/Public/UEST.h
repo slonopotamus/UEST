@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Misc/AutomationTest.h"
+
 // These asserts are just a stub
 
 #define AssertThatMsgf(Expression, Message, ...) \
@@ -29,6 +31,18 @@ protected:
 	virtual void DoTest(const FString& Parameters)
 	{
 	}
+
+public:
+	// TODO: Can we do this without delegates, just using method pointers?
+	TMap<FString, FSimpleDelegate> TestMethods;
+};
+
+struct FUESTMethodRegistrar
+{
+	FUESTMethodRegistrar(FString Name, FUESTTestBase& Test, FSimpleDelegate Delegate)
+	{
+		Test.TestMethods.Add(Name, Delegate);
+	}
 };
 
 template<typename TClass>
@@ -51,30 +65,33 @@ struct TUESTInstantiator
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
 
-#define UEST_CONCAT_SEQ_1(seq, op) BOOST_PP_SEQ_HEAD(seq)
-#define UEST_CONCAT_SEQ_N(seq, op) BOOST_PP_SEQ_FOLD_LEFT(op, BOOST_PP_SEQ_HEAD(seq), BOOST_PP_SEQ_TAIL(seq))
-#define UEST_CONCAT_SEQ(seq, op) BOOST_PP_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(seq), 1), UEST_CONCAT_SEQ_N, UEST_CONCAT_SEQ_1)(seq, op)
+#define UEST_CONCAT_SEQ_1(seq, fold_op, elem_op) elem_op(BOOST_PP_SEQ_HEAD(seq))
+#define UEST_CONCAT_SEQ_N(seq, fold_op, elem_op) BOOST_PP_SEQ_FOLD_LEFT(fold_op, elem_op(BOOST_PP_SEQ_HEAD(seq)), BOOST_PP_SEQ_TAIL(seq))
+#define UEST_CONCAT_SEQ(seq, fold_op, elem_op) BOOST_PP_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(seq), 1), UEST_CONCAT_SEQ_N, UEST_CONCAT_SEQ_1)(seq, fold_op, elem_op)
 
-#define UEST_PRETTY_NAME_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(., x))
-#define UEST_PRETTY_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_PRETTY_NAME_OP)
+#define UEST_PRETTY_NAME_ELEM_OP(x) BOOST_PP_STRINGIZE(x)
+#define UEST_PRETTY_NAME_FOLD_OP(s, state, x) state "." UEST_PRETTY_NAME_ELEM_OP(x)
+#define UEST_PRETTY_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_PRETTY_NAME_FOLD_OP, UEST_PRETTY_NAME_ELEM_OP)
 
-#define UEST_CLASS_NAME_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
-#define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_OP)
+#define UEST_CLASS_NAME_ELEM_OP(x) x
+#define UEST_CLASS_NAME_FOLD_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
+#define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_FOLD_OP, UEST_CLASS_NAME_ELEM_OP)
 
 #define TEST_CLASS_WITH_BASE_IMPL(BaseClass, ClassName, PrettyName) \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
 	struct BOOST_PP_CAT(F, ClassName) : public BaseClass \
 	{ \
+		typedef BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) ThisClass; \
 		typedef BaseClass Super; \
 		BOOST_PP_CAT(F, ClassName)() \
-		    : Super(UE_MODULE_NAME "." BOOST_PP_STRINGIZE(PrettyName)) \
+		    : Super(TEXT(UE_MODULE_NAME "." PrettyName)) \
 		{ \
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
-			return UE_MODULE_NAME "." BOOST_PP_STRINGIZE(PrettyName); \
+			return TEXT(UE_MODULE_NAME "." PrettyName); \
 		} \
 		virtual FString GetTestSourceFileName() const override \
 		{ \
@@ -132,5 +149,5 @@ struct TUESTInstantiator
  */
 #define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, __VA_ARGS__)
 
-// TODO: This is just a stub, we need to register method in test class
-#define TEST_METHOD(MethodName) void MethodName()
+#define TEST_METHOD(MethodName) FUESTMethodRegistrar reg##MethodName{TEXT(#MethodName), *this, FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName)}; \
+		void MethodName()
