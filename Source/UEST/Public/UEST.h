@@ -129,25 +129,6 @@ namespace Matchers
 			return FString::Printf(TEXT("not %s"), *Nested.Describe());
 		}
 	};
-
-	template<typename M>
-	// TODO: Add requires
-	struct Not
-	{
-		M Nested;
-
-		Not() = default;
-
-		Not(M&& Matcher)
-			: Nested(MoveTemp(Matcher))
-		{}
-
-		template<typename T>
-		auto operator()() const
-		{
-			return NotMatcher<T, M>(Nested);
-		}
-	};
 }
 
 namespace Is
