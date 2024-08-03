@@ -129,6 +129,23 @@ namespace Matchers
 			return FString::Printf(TEXT("not %s"), *Nested.Describe());
 		}
 	};
+
+	template <typename T, typename M, typename... P>
+	// TODO: Add requires
+	struct PassthroughNot
+	{
+		NotMatcher<T, M> Matcher;
+
+		explicit PassthroughNot(P... Args)
+			: Matcher{NotMatcher<T, M>{Args...}}
+		{}
+
+		template<typename U>
+		auto operator()() const
+		{
+			return Matcher;
+		}
+	};
 }
 
 namespace Is
@@ -184,20 +201,7 @@ namespace Is
 		} False;
 
 		template<typename T>
-		struct EqualTo
-		{
-			T Expected;
-
-			EqualTo(T Expected)
-				: Expected(Expected)
-			{}
-
-			template<typename U>
-			auto operator()() const
-			{
-				return Matchers::NotMatcher<T, Matchers::EqualTo<T>>{Matchers::EqualTo<T>(Expected)};
-			}
-		};
+		using EqualTo = Matchers::PassthroughNot<T, Matchers::EqualTo<T>, T>;
 	}
 }
 
