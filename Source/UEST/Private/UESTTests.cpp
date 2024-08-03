@@ -19,7 +19,7 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(&v2, Is::Not::Null);
 
 	ASSERT_THAT(42, Is::EqualTo(42));
-	ASSERT_THAT(42., Is::Not::EqualTo(43));
+	ASSERT_THAT(42, Is::Not::EqualTo(43));
 }
 
 TEST_CLASS(UEST, SimpleTestClass)
