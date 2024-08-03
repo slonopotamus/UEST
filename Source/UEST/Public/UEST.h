@@ -182,7 +182,7 @@ namespace UEST
 		M Matcher;
 
 		explicit Passthrough(P... Args)
-			: Matcher{Args...}
+			: Matcher{Forward<P>(Args)...}
 		{}
 
 		template<typename U>
