@@ -13,35 +13,82 @@ struct IMatcher
 	virtual FString Describe() const = 0;
 };
 
-struct InstancedMatcher
-{
-	template<typename T>
-	auto operator()() const
-	{
-		return *this;
-	}
-};
-
 namespace Matchers
 {
-	template<typename T>
-	requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
-	struct Null final : IMatcher<T>
+	static constexpr struct Null
 	{
-		virtual bool Matches(const T& Value) const override
+		template<typename T>
+		requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
+		struct Matcher final : IMatcher<T>
 		{
-			return Value != nullptr;
-		}
+			virtual bool Matches(const T& Value) const override
+			{
+				return Value == nullptr;
+			}
 
-		virtual FString Describe() const override
+			virtual FString Describe() const override
+			{
+				return TEXT("be nullptr");
+			}
+		};
+
+		template<typename T>
+		auto operator()() const
 		{
-			return TEXT("be nullptr");
+			return Matcher<T>();
 		}
-	};
+	} Null;
+
+	static constexpr struct True
+	{
+		template<typename T>
+		requires std::same_as<T, bool>
+		struct Matcher final : IMatcher<T>
+		{
+			virtual bool Matches(const T& Value) const override
+			{
+				return Value;
+			}
+
+			virtual FString Describe() const override
+			{
+				return TEXT("be true");
+			}
+		};
+
+		template<typename T>
+		auto operator()() const
+		{
+			return Matcher<T>();
+		}
+	} True;
+
+	static constexpr struct False
+	{
+		template<typename T>
+		requires std::same_as<T, bool>
+		struct Matcher final : IMatcher<T>
+		{
+			virtual bool Matches(const T& Value) const override
+			{
+				return !Value;
+			}
+
+			virtual FString Describe() const override
+			{
+				return TEXT("be false");
+			}
+		};
+
+		template<typename T>
+		auto operator()() const
+		{
+			return Matcher<T>();
+		}
+	} False;
 
 	template<typename T>
-	// TODO: Add requires
-	struct EqualTo final : IMatcher<T>, InstancedMatcher
+	struct EqualTo final : IMatcher<T>
 	{
 		T Expected;
 
@@ -62,87 +109,52 @@ namespace Matchers
 	};
 
 	template<typename T, typename M>
-	// TODO: Add requires
-	struct NotMatcher final : IMatcher<T>
+	struct NotMatcher : IMatcher<T>
 	{
-		M Matcher;
+		M Nested;
 
 		NotMatcher() = default;
 
-		NotMatcher(IMatcher<T> Matcher)
-			: Matcher(MoveTemp(Matcher))
+		NotMatcher(M&& Nested)
+			: Nested(MoveTemp(Nested))
 		{}
 
 		virtual bool Matches(const T& Value) const override
 		{
-			return !Matcher.Matches(Value);
+			return !Nested.Matches(Value);
 		}
 
 		virtual FString Describe() const override
 		{
-			return FString::Printf(TEXT("not %s"), *Matcher.Describe());
+			return FString::Printf(TEXT("not %s"), *Nested.Describe());
 		}
 	};
 
-	template<typename T>
-	requires std::same_as<T, bool>
-	struct True final : IMatcher<T>
+	template<typename M>
+	// TODO: Add requires
+	struct Not
 	{
-		virtual bool Matches(const T& Value) const override
-		{
-			return Value;
-		}
+		M Nested;
 
-		virtual FString Describe() const override
-		{
-			return TEXT("be true");
-		}
-	};
+		Not() = default;
 
-	template<typename T>
-	requires std::same_as<T, bool>
-	struct False final : IMatcher<T>
-	{
-		virtual bool Matches(const T& Value) const override
-		{
-			return !Value;
-		}
+		Not(M&& Matcher)
+			: Nested(MoveTemp(Matcher))
+		{}
 
-		virtual FString Describe() const override
+		template<typename T>
+		auto operator()() const
 		{
-			return TEXT("be false");
+			return NotMatcher<T, M>(Nested);
 		}
 	};
 }
 
 namespace Is
 {
-	static struct
-	{
-		template<typename T>
-		auto operator()() const
-		{
-			return Matchers::Null<T>();
-		}
-	} Null;
-
-	static struct
-	{
-		template <typename T>
-		auto operator()() const
-		{
-			return Matchers::True<T>();
-		}
-	} True;
-
-	static struct
-	{
-		template <typename T>
-		auto operator()() const
-		{
-			return Matchers::True<T>();
-		}
-	} False;
+	 constexpr const auto& Null = Matchers::Null;
+	 constexpr const auto& True = Matchers::True;
+	 constexpr const auto& False = Matchers::False;
 
 	template<typename T>
 	struct EqualTo
@@ -154,9 +166,10 @@ namespace Is
 		{}
 
 		template<typename U>
+		requires std::is_convertible_v<T, U>
 		auto operator()() const
 		{
-			return Matchers::EqualTo<T>(Expected);
+			return Matchers::EqualTo<T>{Expected};
 		}
 	};
 
@@ -167,7 +180,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::NotMatcher<T, Matchers::Null<T>>();
+				return Matchers::NotMatcher<T, Matchers::Null::Matcher<T>>{};
 			}
 		} Null;
 
@@ -176,7 +189,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::False<T>();
+				return Matchers::False::Matcher<T>{};
 			}
 		} True;
 
@@ -185,7 +198,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::True<T>();
+				return Matchers::True::Matcher<T>{};
 			}
 		} False;
 
@@ -201,7 +214,7 @@ namespace Is
 			template<typename U>
 			auto operator()() const
 			{
-				return Matchers::EqualTo(Expected);
+				return Matchers::NotMatcher<T, Matchers::EqualTo<T>>{Matchers::EqualTo<T>(Expected)};
 			}
 		};
 	}
