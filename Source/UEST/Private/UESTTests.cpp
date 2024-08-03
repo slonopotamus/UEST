@@ -1,6 +1,6 @@
 ﻿#include "UEST.h"
 
-TEST(SimpleTest)
+TEST(UEST, SimpleTest)
 {
 	ASSERT_THAT(true, Is::True);
 
@@ -17,9 +17,12 @@ TEST(SimpleTest)
 
 	const int v2 = 42;
 	ASSERT_THAT(&v2, Is::Not::Null);
+
+	ASSERT_THAT(42, Is::EqualTo(42));
+	ASSERT_THAT(42., Is::Not::EqualTo(43));
 }
 
-TEST_CLASS(SimpleTestClass)
+TEST_CLASS(UEST, SimpleTestClass)
 {
 	TEST_METHOD(Test1)
 	{
@@ -32,12 +35,12 @@ TEST_CLASS(SimpleTestClass)
 	}
 };
 
-TEST(Test, With, Deep, Naming)
+TEST(UEST, Test, With, Deep, Naming)
 {
 	ASSERT_THAT(true, Is::True);
 }
 
-TEST_CLASS(TestClass, With, Deep, Naming)
+TEST_CLASS(UEST, TestClass, With, Deep, Naming)
 {
 	TEST_METHOD(Test1)
 	{

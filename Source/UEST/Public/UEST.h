@@ -13,10 +13,19 @@ struct IMatcher
 	virtual FString Describe() const = 0;
 };
 
-namespace Is
+struct InstancedMatcher
 {
 	template<typename T>
-	requires std::is_pointer_v<T>
+	auto operator()() const
+	{
+		return *this;
+	}
+};
+
+namespace Matchers
+{
+	template<typename T>
+	requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
 	struct Null final : IMatcher<T>
 	{
 		virtual bool Matches(const T& Value) const override
@@ -30,11 +39,39 @@ namespace Is
 		}
 	};
 
+	template<typename T>
+	// TODO: Add requires
+	struct EqualTo final : IMatcher<T>, InstancedMatcher
+	{
+		T Expected;
+
+		EqualTo(T Expected)
+			: Expected(Expected)
+		{
+		}
+
+		virtual bool Matches(const T& Value) const override
+		{
+			return Value == Expected;
+		}
+
+		virtual FString Describe() const override
+		{
+			return FString::Printf(TEXT("be equal to %s"), *CQTestConvert::ToString(Expected));
+		}
+	};
+
 	template<typename T, typename M>
 	// TODO: Add requires
 	struct NotMatcher final : IMatcher<T>
 	{
 		M Matcher;
+
+		NotMatcher() = default;
+
+		NotMatcher(IMatcher<T> Matcher)
+			: Matcher(MoveTemp(Matcher))
+		{}
 
 		virtual bool Matches(const T& Value) const override
 		{
@@ -76,25 +113,105 @@ namespace Is
 			return TEXT("be false");
 		}
 	};
+}
+
+namespace Is
+{
+	static struct
+	{
+		template<typename T>
+		auto operator()() const
+		{
+			return Matchers::Null<T>();
+		}
+	} Null;
+
+	static struct
+	{
+		template <typename T>
+		auto operator()() const
+		{
+			return Matchers::True<T>();
+		}
+	} True;
+
+	static struct
+	{
+		template <typename T>
+		auto operator()() const
+		{
+			return Matchers::True<T>();
+		}
+	} False;
+
+	template<typename T>
+	struct EqualTo
+	{
+		T Expected;
+
+		EqualTo(T Expected)
+			: Expected(Expected)
+		{}
+
+		template<typename U>
+		auto operator()() const
+		{
+			return Matchers::EqualTo<T>(Expected);
+		}
+	};
 
 	namespace Not
 	{
-		template<typename T>
-		using Null = NotMatcher<T, Null<T>>;
+		static struct
+		{
+			template<typename T>
+			auto operator()() const
+			{
+				return Matchers::NotMatcher<T, Matchers::Null<T>>();
+			}
+		} Null;
+
+		static struct
+		{
+			template<typename T>
+			auto operator()() const
+			{
+				return Matchers::False<T>();
+			}
+		} True;
+
+		static struct
+		{
+			template<typename T>
+			auto operator()() const
+			{
+				return Matchers::True<T>();
+			}
+		} False;
 
 		template<typename T>
-		using True = False<T>;
+		struct EqualTo
+		{
+			T Expected;
 
-		template<typename T>
-		using False = True<T>;
+			EqualTo(T Expected)
+				: Expected(Expected)
+			{}
+
+			template<typename U>
+			auto operator()() const
+			{
+				return Matchers::EqualTo(Expected);
+			}
+		};
 	}
 }
 
 #define ASSERT_THAT(Value, Matcher) \
 	do \
 	{ \
-		Matcher<decltype(Value)> _Matcher; \
-		if (!ensureAlwaysMsgf(_Matcher.Matches(Value), TEXT("%s must %s"), *CQTestConvert::ToString(Value), *_Matcher.Describe())) \
+		const auto& MatcherInstance = Matcher.operator()<decltype(Value)>(); \
+		if (!ensureAlwaysMsgf(MatcherInstance.Matches(Value), TEXT("%s must %s"), *CQTestConvert::ToString(Value), *MatcherInstance.Describe())) \
 		{ \
 			return; \
 		} \
@@ -169,14 +286,14 @@ struct TUESTInstantiator
 		typedef BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) ThisClass; \
 		typedef BaseClass Super; \
 		BOOST_PP_CAT(F, ClassName)() \
-		    : Super(TEXT(UE_MODULE_NAME "." PrettyName)) \
+		    : Super(TEXT(PrettyName)) \
 		{ \
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
-			return TEXT(UE_MODULE_NAME "." PrettyName); \
+			return TEXT(PrettyName); \
 		} \
 		virtual FString GetTestSourceFileName() const override \
 		{ \
