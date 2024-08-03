@@ -18,9 +18,13 @@ TEST(UEST, SimpleTest)
 	const int v2 = 42;
 	ASSERT_THAT(&v2, Is::Not::Null);
 
-	ASSERT_THAT(42, Is::EqualTo(42));
 	// TODO: Need explicit <int> for now because of clang bug: https://github.com/llvm/llvm-project/issues/73093
+	ASSERT_THAT(42, Is::EqualTo<int>(42));
 	ASSERT_THAT(42, Is::Not::EqualTo<int>(43));
+	ASSERT_THAT(42, Is::LessThan<int>(43));
+	ASSERT_THAT(42, Is::Not::LessThan<int>(41));
+	ASSERT_THAT(42, Is::GreaterThan<int>(41));
+	ASSERT_THAT(42, Is::Not::GreaterThan<int>(43));
 }
 
 TEST_CLASS(UEST, SimpleTestClass)

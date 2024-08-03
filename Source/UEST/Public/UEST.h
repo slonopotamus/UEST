@@ -13,131 +13,176 @@ struct IMatcher
 	virtual FString Describe() const = 0;
 };
 
-namespace Matchers
+namespace UEST
 {
-	static constexpr struct Null
+	namespace Matchers
 	{
-		template<typename T>
-		requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
-		struct Matcher final : IMatcher<T>
+		static constexpr struct Null
 		{
+			template<typename T>
+			requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
+			struct Matcher final : IMatcher<T>
+			{
+				virtual bool Matches(const T& Value) const override
+				{
+					return Value == nullptr;
+				}
+
+				virtual FString Describe() const override
+				{
+					return TEXT("be nullptr");
+				}
+			};
+
+			template<typename T>
+			auto operator()() const
+			{
+				return Matcher<T>();
+			}
+		} Null;
+
+		static constexpr struct True
+		{
+			template<typename T>
+			requires std::same_as<T, bool>
+			struct Matcher final : IMatcher<T>
+			{
+				virtual bool Matches(const T& Value) const override
+				{
+					return Value;
+				}
+
+				virtual FString Describe() const override
+				{
+					return TEXT("be true");
+				}
+			};
+
+			template<typename T>
+			auto operator()() const
+			{
+				return Matcher<T>();
+			}
+		} True;
+
+		static constexpr struct False
+		{
+			template<typename T>
+			requires std::same_as<T, bool>
+			struct Matcher final : IMatcher<T>
+			{
+				virtual bool Matches(const T& Value) const override
+				{
+					return !Value;
+				}
+
+				virtual FString Describe() const override
+				{
+					return TEXT("be false");
+				}
+			};
+
+			template<typename T>
+			auto operator()() const
+			{
+				return Matcher<T>();
+			}
+		} False;
+
+		template<typename T>
+		struct EqualTo final : IMatcher<T>
+		{
+			T Expected;
+
+			EqualTo(T Expected)
+				: Expected(Expected)
+			{
+			}
+
 			virtual bool Matches(const T& Value) const override
 			{
-				return Value == nullptr;
+				return Value == Expected;
 			}
 
 			virtual FString Describe() const override
 			{
-				return TEXT("be nullptr");
+				return FString::Printf(TEXT("be equal to %s"), *CQTestConvert::ToString(Expected));
 			}
 		};
 
 		template<typename T>
-		auto operator()() const
+		struct LessThan final : IMatcher<T>
 		{
-			return Matcher<T>();
-		}
-	} Null;
+			T Expected;
 
-	static constexpr struct True
-	{
-		template<typename T>
-		requires std::same_as<T, bool>
-		struct Matcher final : IMatcher<T>
-		{
+			LessThan(T Expected)
+				: Expected(Expected)
+			{
+			}
+
 			virtual bool Matches(const T& Value) const override
 			{
-				return Value;
+				return Value < Expected;
 			}
 
 			virtual FString Describe() const override
 			{
-				return TEXT("be true");
+				return FString::Printf(TEXT("be less than %s"), *CQTestConvert::ToString(Expected));
 			}
 		};
 
 		template<typename T>
-		auto operator()() const
+		struct GreaterThan final : IMatcher<T>
 		{
-			return Matcher<T>();
-		}
-	} True;
+			T Expected;
 
-	static constexpr struct False
-	{
-		template<typename T>
-		requires std::same_as<T, bool>
-		struct Matcher final : IMatcher<T>
-		{
+			GreaterThan(T Expected)
+				: Expected(Expected)
+			{
+			}
+
 			virtual bool Matches(const T& Value) const override
 			{
-				return !Value;
+				return Value > Expected;
 			}
 
 			virtual FString Describe() const override
 			{
-				return TEXT("be false");
+				return FString::Printf(TEXT("be greater than %s"), *CQTestConvert::ToString(Expected));
 			}
 		};
 
-		template<typename T>
-		auto operator()() const
+		template<typename T, typename M>
+		struct Not : IMatcher<T>
 		{
-			return Matcher<T>();
-		}
-	} False;
+			M Nested;
 
-	template<typename T>
-	struct EqualTo final : IMatcher<T>
-	{
-		T Expected;
+			Not() = default;
 
-		EqualTo(T Expected)
-			: Expected(Expected)
-		{
-		}
+			Not(M&& Nested)
+				: Nested(MoveTemp(Nested))
+			{}
 
-		virtual bool Matches(const T& Value) const override
-		{
-			return Value == Expected;
-		}
+			virtual bool Matches(const T& Value) const override
+			{
+				return !Nested.Matches(Value);
+			}
 
-		virtual FString Describe() const override
-		{
-			return FString::Printf(TEXT("be equal to %s"), *CQTestConvert::ToString(Expected));
-		}
-	};
+			virtual FString Describe() const override
+			{
+				return FString::Printf(TEXT("not %s"), *Nested.Describe());
+			}
+		};
+	}
 
-	template<typename T, typename M>
-	struct NotMatcher : IMatcher<T>
-	{
-		M Nested;
-
-		NotMatcher() = default;
-
-		NotMatcher(M&& Nested)
-			: Nested(MoveTemp(Nested))
-		{}
-
-		virtual bool Matches(const T& Value) const override
-		{
-			return !Nested.Matches(Value);
-		}
-
-		virtual FString Describe() const override
-		{
-			return FString::Printf(TEXT("not %s"), *Nested.Describe());
-		}
-	};
-
-	template <typename T, typename M, typename... P>
+	template <typename M, typename... P>
 	// TODO: Add requires
-	struct PassthroughNot
+	struct Passthrough
 	{
-		NotMatcher<T, M> Matcher;
+		M Matcher;
 
-		explicit PassthroughNot(P... Args)
-			: Matcher{NotMatcher<T, M>{Args...}}
+		explicit Passthrough(P... Args)
+			: Matcher{Args...}
 		{}
 
 		template<typename U>
@@ -150,26 +195,18 @@ namespace Matchers
 
 namespace Is
 {
-	 constexpr const auto& Null = Matchers::Null;
-	 constexpr const auto& True = Matchers::True;
-	 constexpr const auto& False = Matchers::False;
+	constexpr const auto& Null = UEST::Matchers::Null;
+	constexpr const auto& True = UEST::Matchers::True;
+	constexpr const auto& False = UEST::Matchers::False;
 
 	template<typename T>
-	struct EqualTo
-	{
-		T Expected;
+	using EqualTo = UEST::Passthrough<UEST::Matchers::EqualTo<T>, T>;
 
-		EqualTo(T Expected)
-			: Expected(Expected)
-		{}
+	template<typename T>
+	using LessThan = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
 
-		template<typename U>
-		requires std::is_convertible_v<T, U>
-		auto operator()() const
-		{
-			return Matchers::EqualTo<T>{Expected};
-		}
-	};
+	template<typename T>
+	using GreaterThan = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T>;
 
 	namespace Not
 	{
@@ -178,7 +215,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::NotMatcher<T, Matchers::Null::Matcher<T>>{};
+				return UEST::Matchers::Not<T, UEST::Matchers::Null::Matcher<T>>{};
 			}
 		} Null;
 
@@ -187,7 +224,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::False::Matcher<T>{};
+				return UEST::Matchers::False::Matcher<T>{};
 			}
 		} True;
 
@@ -196,12 +233,18 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return Matchers::True::Matcher<T>{};
+				return UEST::Matchers::True::Matcher<T>{};
 			}
 		} False;
 
 		template<typename T>
-		using EqualTo = Matchers::PassthroughNot<T, Matchers::EqualTo<T>, T>;
+		using EqualTo = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::EqualTo<T>>, T>;
+
+		template<typename T>
+		using LessThan = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::LessThan<T>>, T>;
+
+		template<typename T>
+		using GreaterThan = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::GreaterThan<T>>, T>;
 	}
 }
 
