@@ -23,9 +23,8 @@ namespace UEST
 	{
 		M Matcher;
 
-		// TODO: Rethink signature. Maybe (P... Args) with MoveTemp? Or (P&&... Args) With Forward?
-		explicit Passthrough(const P&... Args)
-			: Matcher{Args...}
+		explicit Passthrough(P... Args)
+			: Matcher{MoveTemp(Args)...}
 		{
 		}
 
@@ -117,10 +116,10 @@ namespace UEST
 		// TODO: Add requires
 		struct EqualTo final : IMatcher<T>
 		{
-			const T& Expected;
+			const T Expected;
 
-			explicit EqualTo(const T& Expected)
-			    : Expected(Expected)
+			explicit EqualTo(T Expected)
+			    : Expected(MoveTemp(Expected))
 			{
 			}
 
@@ -139,10 +138,10 @@ namespace UEST
 		// TODO: Add requires
 		struct LessThan final : IMatcher<T>
 		{
-			const T& Expected;
+			const T Expected;
 
-			explicit LessThan(const T& Expected)
-			    : Expected{Expected}
+			explicit LessThan(T Expected)
+			    : Expected{MoveTemp(Expected)}
 			{
 			}
 
@@ -161,10 +160,10 @@ namespace UEST
 		// TODO: Add requires
 		struct LessThanOrEqualTo final : IMatcher<T>
 		{
-			const T& Expected;
+			const T Expected;
 
-			explicit LessThanOrEqualTo(const T& Expected)
-			    : Expected{Expected}
+			explicit LessThanOrEqualTo(T Expected)
+			    : Expected{MoveTemp(Expected)}
 			{
 			}
 
@@ -183,10 +182,10 @@ namespace UEST
 		// TODO: Add requires
 		struct GreaterThan final : IMatcher<T>
 		{
-			const T& Expected;
+			const T Expected;
 
-			explicit GreaterThan(const T& Expected)
-			    : Expected{Expected}
+			explicit GreaterThan(T Expected)
+			    : Expected{MoveTemp(Expected)}
 			{
 			}
 
@@ -205,10 +204,10 @@ namespace UEST
 		// TODO: Add requires
 		struct GreaterThanOrEqualTo final : IMatcher<T>
 		{
-			const T& Expected;
+			const T Expected;
 
-			explicit GreaterThanOrEqualTo(const T& Expected)
-			    : Expected{Expected}
+			explicit GreaterThanOrEqualTo(T Expected)
+			    : Expected{MoveTemp(Expected)}
 			{
 			}
 
@@ -227,12 +226,12 @@ namespace UEST
 		// TODO: Add requires
 		struct InRange final : IMatcher<T>
 		{
-			const T& From;
-			const T& To;
+			const T From;
+			const T To;
 
-			explicit InRange(const T& From, const T& To)
-				: From{From}
-				, To{To}
+			explicit InRange(T From, T To)
+				: From{MoveTemp(From)}
+				, To{MoveTemp(To)}
 			{
 			}
 
@@ -259,8 +258,8 @@ namespace UEST
 		{
 			M Nested;
 
-			explicit Not(const P&... Args)
-			    : Nested{Args...}
+			explicit Not(P... Args)
+			    : Nested{MoveTemp(Args)...}
 			{
 			}
 
@@ -308,11 +307,11 @@ namespace Is
 	template<typename T>
 	using AtLeast = GreaterThanOrEqualTo<T>;
 
-	const auto Zero = EqualTo<double>(0.);
+	const auto Zero = EqualTo<int64>(0);
 
-	const auto Positive = GreaterThan<double>(0.);
+	const auto Positive = GreaterThan<int64>(0);
 
-	const auto Negative = LessThan<double>(0.);
+	const auto Negative = LessThan<int64>(0);
 
 	template<typename T>
 	using InRange = UEST::Passthrough<UEST::Matchers::InRange<T>, T, T>;
@@ -361,11 +360,11 @@ namespace Is
 		template<typename T>
 		using GreaterThanOrEqualTo = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
 
-		const auto Zero = EqualTo<double>(0.);
+		const auto Zero = EqualTo<int64>(0);
 
-		const auto Positive = GreaterThan<double>(0.);
+		const auto Positive = GreaterThan<int64>(0);
 
-		const auto Negative = LessThan<double>(0.);
+		const auto Negative = LessThan<int64>(0);
 
 		template<typename T>
 		using InRange = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::InRange<T>, T, T>, T, T>;
@@ -377,7 +376,7 @@ namespace Is
 	do \
 	{ \
 		const auto& MatcherInstance = Matcher.operator()<decltype(Value)>(); \
-		if (!ensureAlwaysMsgf(MatcherInstance.Matches(Value), TEXT("%s must %s"), *CQTestConvert::ToString(Value), *MatcherInstance.Describe())) \
+		if (!ensureAlwaysMsgf(MatcherInstance.Matches(Value), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(Value), *MatcherInstance.Describe())) \
 		{ \
 			return; \
 		} \
@@ -395,10 +394,6 @@ protected:
 	virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override;
 
 	virtual bool RunTest(const FString& Parameters) override;
-
-	virtual void DoTest(const FString& Parameters)
-	{
-	}
 
 public:
 	// TODO: Can we do this without delegates, just using method pointers?
@@ -481,7 +476,12 @@ struct TUESTInstantiator
 #define TEST_WITH_BASE(BaseClass, ...) \
 	TEST_CLASS_WITH_BASE(BaseClass, __VA_ARGS__) \
 	{ \
-		virtual void DoTest(const FString& Parameters) override; \
+		virtual bool RunTest(const FString& Parameters) override \
+		{ \
+			DoTest(Parameters); \
+			return true; \
+		} \
+		void DoTest(const FString& Parameters); \
 	}; \
 	void BOOST_PP_CAT(BOOST_PP_CAT(F, UEST_CLASS_NAME(__VA_ARGS__)), Impl)::DoTest(const FString& Parameters)
 

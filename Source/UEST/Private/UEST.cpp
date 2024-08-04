@@ -40,10 +40,8 @@ bool FUESTTestBase::RunTest(const FString& Parameters)
 			Method->Execute();
 		}
 	}
-	else
-	{
-		DoTest(Parameters);
-	}
+
+	// TODO: Should we mark test class without test methods as failed?
 
 	return true;
 }
