@@ -80,7 +80,7 @@ Failed assertion performs `return`, aborting further test execution.
 
 IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] in versions older than 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
 
-You can also negate matchers using `ASSERT_THAT(Value, Is::Not::<assertion>)`.
+You can also negate assertions using `ASSERT_THAT(Value, Is::Not::<matcher>)`.
 
 Negated assertion example:
 [source,cpp]
