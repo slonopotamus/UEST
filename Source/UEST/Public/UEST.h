@@ -37,7 +37,7 @@ namespace UEST
 			template<typename T>
 			auto operator()() const
 			{
-				return Matcher<T>();
+				return Matcher<T>{};
 			}
 		} Null;
 
@@ -61,7 +61,7 @@ namespace UEST
 			template<typename T>
 			auto operator()() const
 			{
-				return Matcher<T>();
+				return Matcher<T>{};
 			}
 		} True;
 
@@ -85,7 +85,7 @@ namespace UEST
 			template<typename T>
 			auto operator()() const
 			{
-				return Matcher<T>();
+				return Matcher<T>{};
 			}
 		} False;
 
@@ -118,7 +118,7 @@ namespace UEST
 			const T& Expected;
 
 			LessThan(const T& Expected)
-			    : Expected(Expected)
+			    : Expected{Expected}
 			{
 			}
 
@@ -140,7 +140,7 @@ namespace UEST
 			const T& Expected;
 
 			LessThanOrEqual(const T& Expected)
-			    : Expected(Expected)
+			    : Expected{Expected}
 			{
 			}
 
@@ -162,7 +162,7 @@ namespace UEST
 			const T& Expected;
 
 			GreaterThan(const T& Expected)
-			    : Expected(Expected)
+			    : Expected{Expected}
 			{
 			}
 
@@ -184,7 +184,7 @@ namespace UEST
 			const T& Expected;
 
 			GreaterThanOrEqual(const T& Expected)
-			    : Expected(Expected)
+			    : Expected{Expected}
 			{
 			}
 
@@ -209,7 +209,7 @@ namespace UEST
 			Not() = default;
 
 			Not(M&& Nested)
-			    : Nested(MoveTemp(Nested))
+			    : Nested{MoveTemp(Nested)}
 			{
 			}
 
