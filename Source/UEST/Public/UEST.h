@@ -90,6 +90,7 @@ namespace UEST
 		} False;
 
 		template<typename T>
+		// TODO: Add requires
 		struct EqualTo final : IMatcher<T>
 		{
 			const T& Expected;
@@ -111,6 +112,7 @@ namespace UEST
 		};
 
 		template<typename T>
+		// TODO: Add requires
 		struct LessThan final : IMatcher<T>
 		{
 			const T& Expected;
@@ -132,6 +134,7 @@ namespace UEST
 		};
 
 		template<typename T>
+		// TODO: Add requires
 		struct LessThanOrEqual final : IMatcher<T>
 		{
 			const T& Expected;
@@ -153,6 +156,7 @@ namespace UEST
 		};
 
 		template<typename T>
+		// TODO: Add requires
 		struct GreaterThan final : IMatcher<T>
 		{
 			const T& Expected;
@@ -174,6 +178,7 @@ namespace UEST
 		};
 
 		template<typename T>
+		// TODO: Add requires
 		struct GreaterThanOrEqual final : IMatcher<T>
 		{
 			const T& Expected;
@@ -194,7 +199,9 @@ namespace UEST
 			}
 		};
 
+		// TODO: Can we get rid of <T> using concepts?
 		template<typename T, typename M>
+		// TODO: Add requires
 		struct Not : IMatcher<T>
 		{
 			M Nested;
