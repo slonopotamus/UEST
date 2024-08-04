@@ -25,6 +25,17 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(42, Is::Not::LessThan<int>(41));
 	ASSERT_THAT(42, Is::GreaterThan<int>(41));
 	ASSERT_THAT(42, Is::Not::GreaterThan<int>(43));
+
+	ASSERT_THAT(0, Is::Zero);
+	ASSERT_THAT(1, Is::Not::Zero);
+	ASSERT_THAT(1, Is::Positive);
+	ASSERT_THAT(1, Is::Not::Negative);
+	ASSERT_THAT(-1, Is::Negative);
+	ASSERT_THAT(-1, Is::Not::Positive);
+
+	ASSERT_THAT(1, Is::InRange<int>(0, 2));
+	// TODO: Doesn't compile. Need more coffee to understand how to fix.
+	// ASSERT_THAT(1, Is::Not::InRange<int>(2, 4));
 }
 
 TEST_CLASS(UEST, SimpleTestClass)
