@@ -92,9 +92,9 @@ namespace UEST
 		template<typename T>
 		struct EqualTo final : IMatcher<T>
 		{
-			T Expected;
+			const T& Expected;
 
-			EqualTo(T Expected)
+			EqualTo(const T& Expected)
 				: Expected(Expected)
 			{
 			}
@@ -113,9 +113,9 @@ namespace UEST
 		template<typename T>
 		struct LessThan final : IMatcher<T>
 		{
-			T Expected;
+			const T& Expected;
 
-			LessThan(T Expected)
+			LessThan(const T& Expected)
 				: Expected(Expected)
 			{
 			}
@@ -132,11 +132,32 @@ namespace UEST
 		};
 
 		template<typename T>
+		struct LessThanOrEqual final : IMatcher<T>
+		{
+			const T& Expected;
+
+			LessThanOrEqual(const T& Expected)
+				: Expected(Expected)
+			{
+			}
+
+			virtual bool Matches(const T& Value) const override
+			{
+				return Value <= Expected;
+			}
+
+			virtual FString Describe() const override
+			{
+				return FString::Printf(TEXT("be less than or equal to %s"), *CQTestConvert::ToString(Expected));
+			}
+		};
+
+		template<typename T>
 		struct GreaterThan final : IMatcher<T>
 		{
-			T Expected;
+			const T& Expected;
 
-			GreaterThan(T Expected)
+			GreaterThan(const T& Expected)
 				: Expected(Expected)
 			{
 			}
@@ -149,6 +170,27 @@ namespace UEST
 			virtual FString Describe() const override
 			{
 				return FString::Printf(TEXT("be greater than %s"), *CQTestConvert::ToString(Expected));
+			}
+		};
+
+		template<typename T>
+		struct GreaterThanOrEqual final : IMatcher<T>
+		{
+			const T& Expected;
+
+			GreaterThanOrEqual(const T& Expected)
+				: Expected(Expected)
+			{
+			}
+
+			virtual bool Matches(const T& Value) const override
+			{
+				return Value >= Expected;
+			}
+
+			virtual FString Describe() const override
+			{
+				return FString::Printf(TEXT("be greater than or equal to %s"), *CQTestConvert::ToString(Expected));
 			}
 		};
 
@@ -181,8 +223,8 @@ namespace UEST
 	{
 		M Matcher;
 
-		explicit Passthrough(P... Args)
-			: Matcher{Forward<P>(Args)...}
+		explicit Passthrough(const P&... Args)
+			: Matcher{Args...}
 		{}
 
 		template<typename U>
@@ -206,7 +248,13 @@ namespace Is
 	using LessThan = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
 
 	template<typename T>
+	using LessThanOrEqual = UEST::Passthrough<UEST::Matchers::LessThanOrEqual<T>, T>;
+
+	template<typename T>
 	using GreaterThan = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T>;
+
+	template<typename T>
+	using GreaterThanOrEqual = UEST::Passthrough<UEST::Matchers::GreaterThanOrEqual<T>, T>;
 
 	namespace Not
 	{
@@ -241,10 +289,16 @@ namespace Is
 		using EqualTo = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::EqualTo<T>>, T>;
 
 		template<typename T>
-		using LessThan = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::LessThan<T>>, T>;
+		using LessThan = UEST::Passthrough<UEST::Matchers::GreaterThanOrEqual<T>, T>;
 
 		template<typename T>
-		using GreaterThan = UEST::Passthrough<UEST::Matchers::Not<T, UEST::Matchers::GreaterThan<T>>, T>;
+		using LessThanOrEqual = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T>;
+
+		template<typename T>
+		using GreaterThan = UEST::Passthrough<UEST::Matchers::LessThanOrEqual<T>, T>;
+
+		template<typename T>
+		using GreaterThanOrEqual = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
 	}
 }
 
