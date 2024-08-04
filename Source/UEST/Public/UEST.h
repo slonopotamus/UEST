@@ -24,7 +24,7 @@ namespace UEST
 		M Matcher;
 
 		explicit Passthrough(P... Args)
-			: Matcher{MoveTemp(Args)...}
+		    : Matcher{MoveTemp(Args)...}
 		{
 		}
 
@@ -65,7 +65,7 @@ namespace UEST
 		static constexpr struct True
 		{
 			template<typename T>
-				// TODO: Maybe we instead want to accept anything with operator bool()?
+			// TODO: Maybe we instead want to accept anything with operator bool()?
 			    requires std::same_as<T, bool>
 			struct Matcher final : IMatcher<T>
 			{
@@ -90,7 +90,7 @@ namespace UEST
 		static constexpr struct False
 		{
 			template<typename T>
-				// TODO: Maybe we instead want to accept anything with operator bool()?
+			// TODO: Maybe we instead want to accept anything with operator bool()?
 			    requires std::same_as<T, bool>
 			struct Matcher final : IMatcher<T>
 			{
@@ -230,8 +230,8 @@ namespace UEST
 			const T To;
 
 			explicit InRange(T From, T To)
-				: From{MoveTemp(From)}
-				, To{MoveTemp(To)}
+			    : From{MoveTemp(From)}
+			    , To{MoveTemp(To)}
 			{
 			}
 
@@ -264,8 +264,9 @@ namespace UEST
 			}
 
 			explicit Not(M&& Nested)
-				: Nested{Nested}
-			{}
+			    : Nested{Nested}
+			{
+			}
 
 			virtual bool Matches(const T& Value) const override
 			{
