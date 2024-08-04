@@ -97,6 +97,7 @@ ASSERT_THAT(Value, Is::Not::Null);
 * Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them, also known as "soft assertions".
 * Add API to disable tests (with `EAutomationTestFlags::Disabled` under the hood)
 * Add API for asynchronous/latent tests
+* API for UWorld testing
 
 == Analysis of existing Unreal Engine solutions
 
