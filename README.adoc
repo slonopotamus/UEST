@@ -78,7 +78,7 @@ Failed assertion performs `return`, aborting further test execution.
 `ASSERT_THAT(Value, Is::Negative)`:: Shortcut for `ASSERT_THAT(Value, Is::LessThan(0))`.
 `ASSERT_THAT(Value, Is::InRange(From, To))`:: Tests that `Value` is greater than or equal to `From` and is less than or equal to `To`.
 
-IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] before 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
+IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] in versions older than 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
 
 You can also negate matchers using `ASSERT_THAT(Value, Is::Not::<assertion>)`.
 
