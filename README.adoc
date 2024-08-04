@@ -3,6 +3,7 @@
 
 ifdef::env-github[]
 :caution-caption: :fire:
+:important-caption: :exclamation:
 endif::[]
 
 This project aims to provide a testing framework for Unreal Engine that does not suck.
