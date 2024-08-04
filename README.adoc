@@ -90,7 +90,13 @@ ASSERT_THAT(Value, Is::Not::Null);
 
 #TODO: Document how to write custom matchers#
 
-#TODO: Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them#
+== Further development plans
+
+* `BEFORE_EACH`/`AFTER_EACH` to `TEST_CLASS`
+* More matchers
+* Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them, also known as "soft assertions".
+* Add API to disable tests (with `EAutomationTestFlags::Disabled` under the hood)
+* Add API for asynchronous/latent tests
 
 == Analysis of existing Unreal Engine solutions
 

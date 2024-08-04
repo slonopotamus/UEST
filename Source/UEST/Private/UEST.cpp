@@ -37,6 +37,7 @@ bool FUESTTestBase::RunTest(const FString& Parameters)
 	{
 		if (const auto* Method = TestMethods.Find(Parameters); ensure(Method))
 		{
+			// TODO: Add things like BEFORE_EACH() {...}, AFTER_EACH() {...}?
 			Method->Execute();
 		}
 	}
