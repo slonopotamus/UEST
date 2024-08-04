@@ -20,7 +20,7 @@ namespace UEST
 		static constexpr struct Null
 		{
 			template<typename T>
-			requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
+			    requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
 			struct Matcher final : IMatcher<T>
 			{
 				virtual bool Matches(const T& Value) const override
@@ -44,7 +44,7 @@ namespace UEST
 		static constexpr struct True
 		{
 			template<typename T>
-			requires std::same_as<T, bool>
+			    requires std::same_as<T, bool>
 			struct Matcher final : IMatcher<T>
 			{
 				virtual bool Matches(const T& Value) const override
@@ -68,7 +68,7 @@ namespace UEST
 		static constexpr struct False
 		{
 			template<typename T>
-			requires std::same_as<T, bool>
+			    requires std::same_as<T, bool>
 			struct Matcher final : IMatcher<T>
 			{
 				virtual bool Matches(const T& Value) const override
@@ -96,7 +96,7 @@ namespace UEST
 			const T& Expected;
 
 			EqualTo(const T& Expected)
-				: Expected(Expected)
+			    : Expected(Expected)
 			{
 			}
 
@@ -118,7 +118,7 @@ namespace UEST
 			const T& Expected;
 
 			LessThan(const T& Expected)
-				: Expected(Expected)
+			    : Expected(Expected)
 			{
 			}
 
@@ -140,7 +140,7 @@ namespace UEST
 			const T& Expected;
 
 			LessThanOrEqual(const T& Expected)
-				: Expected(Expected)
+			    : Expected(Expected)
 			{
 			}
 
@@ -162,7 +162,7 @@ namespace UEST
 			const T& Expected;
 
 			GreaterThan(const T& Expected)
-				: Expected(Expected)
+			    : Expected(Expected)
 			{
 			}
 
@@ -184,7 +184,7 @@ namespace UEST
 			const T& Expected;
 
 			GreaterThanOrEqual(const T& Expected)
-				: Expected(Expected)
+			    : Expected(Expected)
 			{
 			}
 
@@ -209,8 +209,9 @@ namespace UEST
 			Not() = default;
 
 			Not(M&& Nested)
-				: Nested(MoveTemp(Nested))
-			{}
+			    : Nested(MoveTemp(Nested))
+			{
+			}
 
 			virtual bool Matches(const T& Value) const override
 			{
@@ -222,17 +223,18 @@ namespace UEST
 				return FString::Printf(TEXT("not %s"), *Nested.Describe());
 			}
 		};
-	}
+	} // namespace Matchers
 
-	template <typename M, typename... P>
+	template<typename M, typename... P>
 	// TODO: Add requires
 	struct Passthrough
 	{
 		M Matcher;
 
 		explicit Passthrough(const P&... Args)
-			: Matcher{Args...}
-		{}
+		    : Matcher{Args...}
+		{
+		}
 
 		template<typename U>
 		auto operator()() const
@@ -240,7 +242,7 @@ namespace UEST
 			return Matcher;
 		}
 	};
-}
+} // namespace UEST
 
 namespace Is
 {
@@ -306,8 +308,8 @@ namespace Is
 
 		template<typename T>
 		using GreaterThanOrEqual = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
-	}
-}
+	} // namespace Not
+} // namespace Is
 
 #define ASSERT_THAT(Value, Matcher) \
 	do \
@@ -383,11 +385,13 @@ struct TUESTInstantiator
 
 #define TEST_CLASS_WITH_BASE_IMPL(BaseClass, ClassName, PrettyName) \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
-	struct BOOST_PP_CAT(F, ClassName) : public BaseClass \
+	struct BOOST_PP_CAT(F, ClassName) \
+	    : public BaseClass \
 	{ \
 		typedef BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) ThisClass; \
 		typedef BaseClass Super; \
-		BOOST_PP_CAT(F, ClassName)() \
+		BOOST_PP_CAT(F, ClassName) \
+		() \
 		    : Super(TEXT(PrettyName)) \
 		{ \
 		} \
@@ -407,7 +411,8 @@ struct TUESTInstantiator
 		} \
 	}; \
 	static TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
-	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) : public BOOST_PP_CAT(F, ClassName)
+	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
+	    : public BOOST_PP_CAT(F, ClassName)
 
 #define TEST_CLASS_WITH_BASE(BaseClass, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
 
@@ -453,5 +458,6 @@ struct TUESTInstantiator
  */
 #define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, __VA_ARGS__)
 
-#define TEST_METHOD(MethodName) FUESTMethodRegistrar reg##MethodName{TEXT(#MethodName), *this, FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName)}; \
-		void MethodName()
+#define TEST_METHOD(MethodName) \
+	FUESTMethodRegistrar reg##MethodName{TEXT(#MethodName), *this, FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName)}; \
+	void MethodName()
