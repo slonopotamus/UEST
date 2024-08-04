@@ -5,8 +5,6 @@ ifdef::env-github[]
 :caution-caption: :fire:
 endif::[]
 
-CAUTION: This is pre-alpha software, not ready for production!
-
 This project aims to provide a testing framework for Unreal Engine that does not suck.
 
 == Goals
@@ -16,7 +14,14 @@ This project aims to provide a testing framework for Unreal Engine that does not
 * Async execution support
 * IDE and CI first-class support
 
+== Dependencies
+
+This project relies on C++20 features.
+Tested against Unreal Engine 5.4.
+
 == Usage
+
+=== Defining tests
 
 .Simple test
 [source,cpp]
@@ -52,6 +57,39 @@ TEST_CLASS(MyFancyTestClass)
     // put helper fields or methods here
 }
 ----
+
+=== Assertions
+
+All UEST assertions are done through `ASSERT_THAT(Expression, Matcher)`.
+Failed assertion performs `return`, aborting further test execution.
+
+.Available matchers
+`ASSERT_THAT(Value, Is::True)`:: Tests that `Value` is `true`.
+`ASSERT_THAT(Value, Is::False)`:: Tests that `Value` is `false`.
+`ASSERT_THAT(Value, Is::Null)`:: Tests that `Value` is `nullptr`.
+`ASSERT_THAT(Value, Is::EqualTo(Expected))`:: Tests that `Value` is equal to `Expected`.
+`ASSERT_THAT(Value, Is::LessThan(OtherValue))`:: Tests that `Value` is less than `OtherValue`.
+`ASSERT_THAT(Value, Is::LessThanOrEqualTo(OtherValue))` or `ASSERT_THAT(Value, Is::AtMost(OtherValue)`:: Tests that `Value` is less than or equal to `OtherValue`.
+`ASSERT_THAT(Value, Is::GreaterThan(OtherValue))`:: Tests that `Value` is greater than `OtherValue`.
+`ASSERT_THAT(Value, Is::GreaterThanOrEqualTo(OtherValue))` or `ASSERT_THAT(Value, Is::AtLeast(OtherValue)`:: Tests that `Value` is greater than or equal to `OtherValue`.
+`ASSERT_THAT(Value, Is::Zero)`:: Shortcut for `ASSERT_THAT(Value, Is::EqualTo(0))`.
+`ASSERT_THAT(Value, Is::Positive)`:: Shortcut for `ASSERT_THAT(Value, Is::GreaterThan(0))`.
+`ASSERT_THAT(Value, Is::Negative)`:: Shortcut for `ASSERT_THAT(Value, Is::LessThan(0))`.
+`ASSERT_THAT(Value, Is::InRange(From, To))`:: Tests that `Value` is greater than or equal to `From` and is less than or equal to `To`.
+
+IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] before 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
+
+You can also negate matchers using `ASSERT_THAT(Value, Is::Not::<assertion>)`.
+
+Negated assertion example:
+[source,cpp]
+----
+ASSERT_THAT(Value, Is::Not::Null);
+----
+
+#TODO: Document how to write custom matchers#
+
+#TODO: Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them#
 
 == Analysis of existing Unreal Engine solutions
 

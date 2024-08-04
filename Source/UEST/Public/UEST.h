@@ -372,6 +372,7 @@ namespace Is
 	} // namespace Not
 } // namespace Is
 
+// TODO: Provide ASSERT_THAT(Value) variant that tests that Value is true
 #define ASSERT_THAT(Value, Matcher) \
 	do \
 	{ \
