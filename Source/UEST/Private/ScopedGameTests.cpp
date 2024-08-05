@@ -5,12 +5,18 @@ TEST(UEST, ScopedGame, Simple)
 {
 	auto Tester = FScopedGame().Create();
 
-	// You can create dedicated server
+	// You can create a dedicated server
 	UGameInstance* Server = Tester.CreateGame(EScopedGameType::DedicatedServer, TEXT("/Engine/Maps/Entry"));
 
 	// You can connect a client to it
 	UGameInstance* Client = Tester.CreateClientFor(Server);
 	ASSERT_THAT(Client, Is::Not::Null);
+
+	// Actually, you can connect as many clients as you want!
+	for (int32 Index = 0; Index < 10; ++Index)
+	{
+		Tester.CreateClientFor(Server);
+	}
 
 	// You can access game worlds
 	UWorld* ServerWorld = Server->GetWorld();
