@@ -468,7 +468,7 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
-	static TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
+	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
 	    : public BOOST_PP_CAT(F, ClassName)
 

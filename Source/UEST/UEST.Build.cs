@@ -12,6 +12,8 @@ public class UEST : ModuleRules
 				"CoreUObject",
 				"CQTest",
 				"Engine",
+				"EngineSettings",
+				"IrisCore",
 			}
 		);
 	}
