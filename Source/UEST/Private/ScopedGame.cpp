@@ -398,9 +398,13 @@ bool FScopedGameInstance::TickUntil(const TFunction<bool()>& Condition, const fl
 	return Condition();
 }
 
-FScopedGame& FScopedGame::WithProjectGameInstance()
+FScopedGame::FScopedGame()
 {
-	return WithGameInstance(GetDefault<UGameMapsSettings>()->GameInstanceClass.TryLoadClass<UGameInstance>());
+	GameInstanceClass = GetDefault<UGameMapsSettings>()->GameInstanceClass.TryLoadClass<UGameInstance>();
+	if (!GameInstanceClass)
+	{
+		GameInstanceClass = UGameInstance::StaticClass();
+	}
 }
 
 FScopedGameInstance FScopedGame::Create() const

@@ -57,10 +57,12 @@ public:
 
 class FScopedGame
 {
-	TSubclassOf<UGameInstance> GameInstanceClass = UGameInstance::StaticClass();
+	TSubclassOf<UGameInstance> GameInstanceClass;
 	bool bGarbageCollectOnDestroy = true;
 
 public:
+	FScopedGame();
+
 	FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass)
 	{
 		GameInstanceClass = MoveTemp(InGameInstanceClass);
@@ -72,8 +74,6 @@ public:
 		bGarbageCollectOnDestroy = bInGarbageCollectOnDestroy;
 		return *this;
 	}
-
-	FScopedGame& WithProjectGameInstance();
 
 	FScopedGameInstance Create() const;
 };
