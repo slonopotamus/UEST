@@ -15,7 +15,7 @@ TEST(UEST, ScopedGame, Simple)
 	// You can access game worlds
 	UWorld* ServerWorld = Server->GetWorld();
 	ASSERT_THAT(ServerWorld, Is::Not::Null);
-	UWorld* ClientWorld = Server->GetWorld();
+	UWorld* ClientWorld = Client->GetWorld();
 	ASSERT_THAT(ClientWorld, Is::Not::Null);
 
 	// You can access actors in worlds
