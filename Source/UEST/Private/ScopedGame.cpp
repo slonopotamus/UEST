@@ -56,7 +56,7 @@ static int32 NumScopedGames = 0;
 
 static TUniquePtr<FCVarsGuard> CVarsGuard;
 
-FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy)
+FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FString>& CVars)
 	: GameInstanceClass{MoveTemp(GameInstanceClass)}
 	, LastInstanceId{0}
 	, bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
@@ -65,9 +65,10 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 	{
 		CVarsGuard = MakeUnique<FCVarsGuard>();
 
-		// Client runs DNS lookup in separate thread without any way to wait for it (except sleeping real time)
-		// So just disable it for now because we know that we connect via IP address
-		CVarsGuard->ConsoleVariableGuards.Emplace(IConsoleManager::Get().FindConsoleVariable(TEXT("net.IpConnectionDisableResolution")),TEXT("1"));
+		for (const auto& CVar : CVars)
+		{
+			CVarsGuard->ConsoleVariableGuards.Emplace(IConsoleManager::Get().FindConsoleVariable(*CVar.Key), *CVar.Value);
+		}
 	}
 
 	++NumScopedGames;
@@ -405,9 +406,13 @@ FScopedGame::FScopedGame()
 	{
 		GameInstanceClass = UGameInstance::StaticClass();
 	}
+
+	// Client runs DNS lookup in separate thread without any way to wait for it (except sleeping real time)
+	// So just disable it for now because we know that we connect via IP address
+	CVars.Add(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
 }
 
 FScopedGameInstance FScopedGame::Create() const
 {
-	return FScopedGameInstance{GameInstanceClass, bGarbageCollectOnDestroy};
+	return FScopedGameInstance{GameInstanceClass, bGarbageCollectOnDestroy, CVars};
 }

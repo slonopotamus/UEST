@@ -28,7 +28,7 @@ class FScopedGameInstance : FNoncopyable
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;
 
-	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, bool bGarbageCollectOnDestroy);
+	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FString>& CVars);
 
 	FScopedGameInstance(FScopedGameInstance&& Other);
 
@@ -59,6 +59,7 @@ class FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
 	bool bGarbageCollectOnDestroy = true;
+	TMap<FString, FString> CVars;
 
 public:
 	FScopedGame();
@@ -66,6 +67,12 @@ public:
 	FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass)
 	{
 		GameInstanceClass = MoveTemp(InGameInstanceClass);
+		return *this;
+	}
+
+	FScopedGame& WithConsoleVariable(FString Name, FString Value)
+	{
+		CVars.Add(MoveTemp(Name), MoveTemp(Value));
 		return *this;
 	}
 
