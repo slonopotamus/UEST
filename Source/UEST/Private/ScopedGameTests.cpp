@@ -6,7 +6,7 @@ TEST(UEST, ScopedGame, Simple)
 	auto Tester = FScopedGame().Create();
 
 	// You can create a dedicated server
-	UGameInstance* Server = Tester.CreateGame(EScopedGameType::DedicatedServer, TEXT("/Engine/Maps/Entry"));
+	UGameInstance* Server = Tester.CreateGame(EScopedGameType::Server, TEXT("/Engine/Maps/Entry"));
 
 	// You can connect a client to it
 	UGameInstance* Client = Tester.CreateClientFor(Server);

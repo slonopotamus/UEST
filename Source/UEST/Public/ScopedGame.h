@@ -4,7 +4,7 @@
 
 enum class EScopedGameType : uint8
 {
-	DedicatedServer,
+	Server,
 	Client,
 	Empty,
 };

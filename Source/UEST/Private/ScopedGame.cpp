@@ -115,7 +115,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 	auto* WorldContext = Game->GetWorldContext();
 	WorldContext->PIEInstance = ++LastInstanceId;
 	WorldContext->PIEPrefix = UWorld::BuildPIEPackagePrefix(WorldContext->PIEInstance);
-	WorldContext->RunAsDedicated = Type == EScopedGameType::DedicatedServer;
+	WorldContext->RunAsDedicated = Type == EScopedGameType::Server;
 
 	if (Type == EScopedGameType::Client)
 	{
@@ -133,7 +133,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 	{
 		FURL URL(nullptr, *MapToLoad, TRAVEL_Absolute);
 
-		if (Type == EScopedGameType::DedicatedServer)
+		if (Type == EScopedGameType::Server)
 		{
 			URL.AddOption(TEXT("listen"));
 		}
