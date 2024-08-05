@@ -1,10 +1,23 @@
 ﻿#pragma once
 
+#if WITH_UNREAL_DEVELOPER_TOOLS
 #include "Assert/CQTestConvert.h"
+#endif
+
 #include "Misc/AutomationTest.h"
 
 namespace UEST
 {
+	template<typename T>
+	static FString ToString(const T& Value)
+	{
+#if WITH_UNREAL_DEVELOPER_TOOLS
+		return CQTestConvert::ToString(Value);
+#else
+		return TEXT("UNKNOWN");
+#endif
+	}
+
 	template<typename T>
 	// TODO: Make this FNoncopyable?
 	struct IMatcher
@@ -130,7 +143,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be equal to %s"), *CQTestConvert::ToString(Expected));
+				return FString::Printf(TEXT("be equal to %s"), *ToString(Expected));
 			}
 		};
 
@@ -152,7 +165,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be less than %s"), *CQTestConvert::ToString(Expected));
+				return FString::Printf(TEXT("be less than %s"), *ToString(Expected));
 			}
 		};
 
@@ -174,7 +187,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be less than or equal to %s"), *CQTestConvert::ToString(Expected));
+				return FString::Printf(TEXT("be less than or equal to %s"), *ToString(Expected));
 			}
 		};
 
@@ -196,7 +209,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be greater than %s"), *CQTestConvert::ToString(Expected));
+				return FString::Printf(TEXT("be greater than %s"), *ToString(Expected));
 			}
 		};
 
@@ -218,7 +231,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be greater than or equal to %s"), *CQTestConvert::ToString(Expected));
+				return FString::Printf(TEXT("be greater than or equal to %s"), *ToString(Expected));
 			}
 		};
 
@@ -247,7 +260,7 @@ namespace UEST
 
 			virtual FString Describe() const override
 			{
-				return FString::Printf(TEXT("be in range from %s to %s"), *CQTestConvert::ToString(From), *CQTestConvert::ToString(To));
+				return FString::Printf(TEXT("be in range from %s to %s"), *ToString(From), *ToString(To));
 			}
 		};
 
