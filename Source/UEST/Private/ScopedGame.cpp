@@ -10,7 +10,7 @@
 struct TGWorldGuard final : FNoncopyable
 {
 	TGWorldGuard()
-		: OldWorld{GWorld}
+	    : OldWorld{GWorld}
 	{
 	}
 
@@ -25,8 +25,8 @@ struct TGWorldGuard final : FNoncopyable
 struct FCVarGuard final : FNoncopyable
 {
 	explicit FCVarGuard(IConsoleVariable* Variable, const FScopedGameInstance::FCVarConfig& CVarConfig)
-		: Variable{Variable}
-		, OldValue{Variable ? Variable->GetString() : TEXT("")}
+	    : Variable{Variable}
+	    , OldValue{Variable ? Variable->GetString() : TEXT("")}
 	{
 		if (Variable || CVarConfig.bEnsureIfVariableNotFound && ensureAlways(Variable))
 		{
@@ -57,9 +57,9 @@ static int32 NumScopedGames = 0;
 static TUniquePtr<FCVarsGuard> CVarsGuard;
 
 FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars)
-	: GameInstanceClass{MoveTemp(GameInstanceClass)}
-	, LastInstanceId{0}
-	, bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
+    : GameInstanceClass{MoveTemp(GameInstanceClass)}
+    , LastInstanceId{0}
+    , bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
 {
 	if (NumScopedGames == 0)
 	{
@@ -75,10 +75,10 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 }
 
 FScopedGameInstance::FScopedGameInstance(FScopedGameInstance&& Other)
-	: GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
-	, Games{MoveTemp(Other.Games)}
-	, LastInstanceId{Other.LastInstanceId}
-	, bGarbageCollectOnDestroy{Other.bGarbageCollectOnDestroy}
+    : GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
+    , Games{MoveTemp(Other.Games)}
+    , LastInstanceId{Other.LastInstanceId}
+    , bGarbageCollectOnDestroy{Other.bGarbageCollectOnDestroy}
 {
 	++NumScopedGames;
 }
@@ -145,7 +145,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 		const auto BrowseResult = Game->GetEngine()->Browse(*WorldContext, URL, Error);
 		if (BrowseResult == EBrowseReturnVal::Pending)
 		{
-			if (bWaitForConnect && !TickUntil([&]
+			const auto WaitForConnect = [&]
 			{
 				if (Game->GetWorldContext()->PendingNetGame)
 				{
@@ -187,7 +187,9 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 				}
 
 				return true;
-			}))
+			};
+
+			if (bWaitForConnect && !TickUntil(WaitForConnect))
 			{
 				ensureAlwaysMsgf(false, TEXT("Timeout connecting to dedicated server"));
 				DestroyGame(Game);
