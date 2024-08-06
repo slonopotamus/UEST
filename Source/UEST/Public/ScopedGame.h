@@ -28,7 +28,13 @@ class FScopedGameInstance : FNoncopyable
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;
 
-	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FString>& CVars);
+	struct FCVarConfig
+	{
+		FString Value;
+		bool bEnsureIfVariableNotFound;
+	};
+
+	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars);
 
 	FScopedGameInstance(FScopedGameInstance&& Other);
 
@@ -47,7 +53,7 @@ public:
 	bool TickUntil(const TFunction<bool()>& Condition, float StepSeconds = DefaultStepSeconds, float MaxWaitTime = 10.f, ELevelTick TickType = LEVELTICK_All);
 
 	template<class T = UObject>
-		requires std::is_convertible_v<T*, const UObject*>
+	    requires std::is_convertible_v<T*, const UObject*>
 	T* FindReplicatedObjectIn(T* Object, const UWorld* World)
 	{
 		auto* Result = StaticFindReplicatedObjectIn(Object, World);
@@ -59,7 +65,7 @@ class FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
 	bool bGarbageCollectOnDestroy = true;
-	TMap<FString, FString> CVars;
+	TMap<FString, FScopedGameInstance::FCVarConfig> CVars;
 
 public:
 	FScopedGame();
@@ -70,9 +76,9 @@ public:
 		return *this;
 	}
 
-	FScopedGame& WithConsoleVariable(FString Name, FString Value)
+	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bEnsureIfVariableNotFound = true)
 	{
-		CVars.Add(MoveTemp(Name), MoveTemp(Value));
+		CVars.Add(MoveTemp(Name), {MoveTemp(Value), bEnsureIfVariableNotFound});
 		return *this;
 	}
 

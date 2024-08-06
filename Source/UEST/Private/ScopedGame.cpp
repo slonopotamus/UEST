@@ -24,13 +24,13 @@ struct TGWorldGuard final : FNoncopyable
 
 struct FCVarGuard final : FNoncopyable
 {
-	explicit FCVarGuard(IConsoleVariable* Variable, const TCHAR* NewValue)
-		: Variable(Variable)
-		, OldValue(Variable ? Variable->GetString() : TEXT(""))
+	explicit FCVarGuard(IConsoleVariable* Variable, const FScopedGameInstance::FCVarConfig& CVarConfig)
+		: Variable{Variable}
+		, OldValue{Variable ? Variable->GetString() : TEXT("")}
 	{
-		if (ensureAlways(Variable))
+		if (Variable || CVarConfig.bEnsureIfVariableNotFound && ensureAlways(Variable))
 		{
-			Variable->Set(NewValue);
+			Variable->Set(*CVarConfig.Value);
 		}
 	}
 
@@ -56,7 +56,7 @@ static int32 NumScopedGames = 0;
 
 static TUniquePtr<FCVarsGuard> CVarsGuard;
 
-FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FString>& CVars)
+FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars)
 	: GameInstanceClass{MoveTemp(GameInstanceClass)}
 	, LastInstanceId{0}
 	, bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
@@ -67,7 +67,7 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 
 		for (const auto& CVar : CVars)
 		{
-			CVarsGuard->ConsoleVariableGuards.Emplace(IConsoleManager::Get().FindConsoleVariable(*CVar.Key), *CVar.Value);
+			CVarsGuard->ConsoleVariableGuards.Emplace(IConsoleManager::Get().FindConsoleVariable(*CVar.Key), CVar.Value);
 		}
 	}
 
@@ -409,7 +409,7 @@ FScopedGame::FScopedGame()
 
 	// Client runs DNS lookup in separate thread without any way to wait for it (except sleeping real time)
 	// So just disable it for now because we know that we connect via IP address
-	CVars.Add(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
+	WithConsoleVariable(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
 }
 
 FScopedGameInstance FScopedGame::Create() const
