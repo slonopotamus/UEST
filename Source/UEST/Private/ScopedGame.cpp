@@ -28,7 +28,7 @@ struct FCVarGuard final : FNoncopyable
 	    : Variable{Variable}
 	    , OldValue{Variable ? Variable->GetString() : TEXT("")}
 	{
-		if (Variable || CVarConfig.bEnsureIfVariableNotFound && ensureAlways(Variable))
+		if (Variable || (CVarConfig.bEnsureIfVariableNotFound && ensureAlways(Variable)))
 		{
 			Variable->Set(*CVarConfig.Value);
 		}
