@@ -18,30 +18,26 @@ namespace UEST
 #endif
 	}
 
-	template<typename T>
-	// TODO: Make this FNoncopyable?
-	struct UEST_API IMatcher
+	template<typename M, typename T, typename... P>
+	concept Matcher = requires(M const m, const T& t, P... p)
 	{
-		virtual ~IMatcher() = default;
-
-		virtual bool Matches(const T& Value) const = 0;
-
-		virtual FString Describe() const = 0;
+		{ M{p...} };
+		{ m.Matches(t) } -> std::same_as<bool>;
+		{ m.Describe() } -> std::same_as<FString>;
 	};
 
-	// TODO: Can we get rid of <P> using concept for M?
-	template<typename M, typename... P>
-	// TODO: Add requires
+	template<typename M, typename T, typename... P>
+	requires Matcher<M, T, P...>
 	struct Passthrough
 	{
 		M Matcher;
 
 		explicit Passthrough(P... Args)
-		    : Matcher{MoveTemp(Args)...}
+			: Matcher{MoveTemp(Args)...}
 		{
 		}
 
-		template<typename U>
+		template<typename>
 		auto operator()() const
 		{
 			// TODO: Can we avoid copying here?
@@ -55,14 +51,14 @@ namespace UEST
 		{
 			template<typename T>
 			    requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
-			struct Matcher final : IMatcher<T>
+			struct Matcher final
 			{
-				virtual bool Matches(const T& Value) const override
+				bool Matches(const T& Value) const
 				{
 					return Value == nullptr;
 				}
 
-				virtual FString Describe() const override
+				FString Describe() const
 				{
 					return TEXT("be nullptr");
 				}
@@ -80,14 +76,14 @@ namespace UEST
 			template<typename T>
 			// TODO: Maybe we instead want to accept anything with operator bool()?
 			    requires std::same_as<T, bool>
-			struct Matcher final : IMatcher<T>
+			struct Matcher final
 			{
-				virtual bool Matches(const T& Value) const override
+				bool Matches(const T& Value) const
 				{
 					return Value;
 				}
 
-				virtual FString Describe() const override
+				FString Describe() const
 				{
 					return TEXT("be true");
 				}
@@ -105,14 +101,14 @@ namespace UEST
 			template<typename T>
 			// TODO: Maybe we instead want to accept anything with operator bool()?
 			    requires std::same_as<T, bool>
-			struct Matcher final : IMatcher<T>
+			struct Matcher final
 			{
-				virtual bool Matches(const T& Value) const override
+				bool Matches(const T& Value) const
 				{
 					return !Value;
 				}
 
-				virtual FString Describe() const override
+				FString Describe() const
 				{
 					return TEXT("be false");
 				}
@@ -125,9 +121,9 @@ namespace UEST
 			}
 		} False;
 
-		template<typename T>
+		template<typename T, typename P=T>
 		// TODO: Add requires
-		struct EqualTo final : IMatcher<T>
+		struct EqualTo final
 		{
 			const T Expected;
 
@@ -136,20 +132,20 @@ namespace UEST
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return Value == Expected;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be equal to %s"), *ToString(Expected));
 			}
 		};
 
-		template<typename T>
+		template<typename T, typename P=T>
 		// TODO: Add requires
-		struct LessThan final : IMatcher<T>
+		struct LessThan final
 		{
 			const T Expected;
 
@@ -158,20 +154,20 @@ namespace UEST
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return Value < Expected;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be less than %s"), *ToString(Expected));
 			}
 		};
 
-		template<typename T>
+		template<typename T, typename P=T>
 		// TODO: Add requires
-		struct LessThanOrEqualTo final : IMatcher<T>
+		struct LessThanOrEqualTo final
 		{
 			const T Expected;
 
@@ -180,20 +176,20 @@ namespace UEST
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return Value <= Expected;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be less than or equal to %s"), *ToString(Expected));
 			}
 		};
 
-		template<typename T>
+		template<typename T, typename P=T>
 		// TODO: Add requires
-		struct GreaterThan final : IMatcher<T>
+		struct GreaterThan final
 		{
 			const T Expected;
 
@@ -202,20 +198,20 @@ namespace UEST
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return Value > Expected;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be greater than %s"), *ToString(Expected));
 			}
 		};
 
-		template<typename T>
+		template<typename T, typename P=T>
 		// TODO: Add requires
-		struct GreaterThanOrEqualTo final : IMatcher<T>
+		struct GreaterThanOrEqualTo final
 		{
 			const T Expected;
 
@@ -224,31 +220,31 @@ namespace UEST
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return Value >= Expected;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be greater than or equal to %s"), *ToString(Expected));
 			}
 		};
 
-		template<typename T>
+		template<typename T, typename P1=T, typename P2=T>
 		// TODO: Add requires
-		struct InRange final : IMatcher<T>
+		struct InRange final
 		{
-			const T From;
-			const T To;
+			const P1 From;
+			const P2 To;
 
-			explicit InRange(T From, T To)
+			explicit InRange(P1 From, P2 To)
 			    : From{MoveTemp(From)}
 			    , To{MoveTemp(To)}
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				if (!ensureAlwaysMsgf(From <= To, TEXT("Invalid range, %s is greater than %s"), *CQTestConvert::ToString(From), *CQTestConvert::ToString(To)))
 				{
@@ -258,39 +254,40 @@ namespace UEST
 				return Value >= From && Value <= To;
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("be in range from %s to %s"), *ToString(From), *ToString(To));
 			}
 		};
 
-		// TODO: Can we get rid of <T> and <P> using concept for <M>?
-		template<typename M, typename T, typename... P>
-		// TODO: Add requires
-		struct Not : IMatcher<T>
+		template<template <typename...> typename M, typename T, typename... P>
+		requires Matcher<M<T, P...>, T, P...> 
+		struct Not
 		{
-			M Nested;
+			M<T, P...> Nested;
 
 			explicit Not(P... Args)
 			    : Nested{MoveTemp(Args)...}
 			{
 			}
 
-			explicit Not(M&& Nested)
+			explicit Not(M<T, P...>&& Nested)
 			    : Nested{Nested}
 			{
 			}
 
-			virtual bool Matches(const T& Value) const override
+			bool Matches(const T& Value) const
 			{
 				return !Nested.Matches(Value);
 			}
 
-			virtual FString Describe() const override
+			FString Describe() const
 			{
 				return FString::Printf(TEXT("not %s"), *Nested.Describe());
 			}
 		};
+
+		using Bla = Not<EqualTo, int32, int32>;
 	} // namespace Matchers
 } // namespace UEST
 
@@ -301,10 +298,10 @@ namespace Is
 	constexpr const auto& False = UEST::Matchers::False;
 
 	template<typename T>
-	using EqualTo = UEST::Passthrough<UEST::Matchers::EqualTo<T>, T>;
+	using EqualTo = UEST::Passthrough<UEST::Matchers::EqualTo<T>, T, T>;
 
 	template<typename T>
-	using LessThan = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
+	using LessThan = UEST::Passthrough<UEST::Matchers::LessThan<T>, T, T>;
 
 	template<typename T>
 	using LessThanOrEqualTo = UEST::Passthrough<UEST::Matchers::LessThanOrEqualTo<T>, T>;
@@ -313,7 +310,7 @@ namespace Is
 	using AtMost = LessThanOrEqualTo<T>;
 
 	template<typename T>
-	using GreaterThan = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T>;
+	using GreaterThan = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T, T>;
 
 	template<typename T>
 	using GreaterThanOrEqualTo = UEST::Passthrough<UEST::Matchers::GreaterThanOrEqualTo<T>, T>;
@@ -328,7 +325,7 @@ namespace Is
 	const auto Negative = LessThan<int64>(0);
 
 	template<typename T>
-	using InRange = UEST::Passthrough<UEST::Matchers::InRange<T>, T, T>;
+	using InRange = UEST::Passthrough<UEST::Matchers::InRange<T>, T, T, T>;
 
 	namespace Not
 	{
@@ -337,7 +334,7 @@ namespace Is
 			template<typename T>
 			auto operator()() const
 			{
-				return UEST::Matchers::Not<UEST::Matchers::Null::Matcher<T>, T>{};
+				return UEST::Matchers::Not<UEST::Matchers::Null::Matcher, T>{};
 			}
 		} Null;
 
@@ -360,19 +357,19 @@ namespace Is
 		} False;
 
 		template<typename T>
-		using EqualTo = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T, T>, T>;
+		using EqualTo = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::EqualTo, T, T>, T, T>;
 
 		template<typename T>
-		using LessThan = UEST::Passthrough<UEST::Matchers::GreaterThanOrEqualTo<T>, T>;
+		using LessThan = UEST::Passthrough<UEST::Matchers::GreaterThanOrEqualTo<T>, T, T>;
 
 		template<typename T>
 		using LessThanOrEqualTo = UEST::Passthrough<UEST::Matchers::GreaterThan<T>, T>;
 
 		template<typename T>
-		using GreaterThan = UEST::Passthrough<UEST::Matchers::LessThanOrEqualTo<T>, T>;
+		using GreaterThan = UEST::Passthrough<UEST::Matchers::LessThanOrEqualTo<T>, T, T>;
 
 		template<typename T>
-		using GreaterThanOrEqualTo = UEST::Passthrough<UEST::Matchers::LessThan<T>, T>;
+		using GreaterThanOrEqualTo = UEST::Passthrough<UEST::Matchers::LessThan<T>, T, T>;
 
 		const auto Zero = EqualTo<int64>(0);
 
@@ -381,15 +378,15 @@ namespace Is
 		const auto Negative = LessThan<int64>(0);
 
 		template<typename T>
-		using InRange = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::InRange<T>, T, T>, T, T>;
+		using InRange = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::InRange, T, T>, T, T>;
 	} // namespace Not
 } // namespace Is
 
 // TODO: Provide ASSERT_THAT(Value) variant that tests that Value is true
-#define ASSERT_THAT(Value, Matcher) \
+#define ASSERT_THAT(Value, M) \
 	do \
 	{ \
-		const auto& MatcherInstance = Matcher.operator()<decltype(Value)>(); \
+		const auto& MatcherInstance = M.operator()<decltype(Value)>(); \
 		if (!ensureAlwaysMsgf(MatcherInstance.Matches(Value), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(Value), *MatcherInstance.Describe())) \
 		{ \
 			return; \
