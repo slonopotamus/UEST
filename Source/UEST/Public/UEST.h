@@ -73,8 +73,7 @@ namespace UEST
 		static constexpr struct True
 		{
 			template<typename T>
-			// TODO: Maybe we instead want to accept anything with operator bool()?
-			    requires std::same_as<T, bool>
+			    requires requires(const T t) { { static_cast<bool>(t) }; }
 			struct Matcher final
 			{
 				bool Matches(const T& Value) const
@@ -98,8 +97,7 @@ namespace UEST
 		static constexpr struct False
 		{
 			template<typename T>
-			// TODO: Maybe we instead want to accept anything with operator bool()?
-			    requires std::same_as<T, bool>
+				requires requires(const T t) { { static_cast<bool>(t) }; }
 			struct Matcher final
 			{
 				bool Matches(const T& Value) const
@@ -121,12 +119,16 @@ namespace UEST
 		} False;
 
 		template<typename T, typename P = T>
-		// TODO: Add requires
+		    requires requires(const T t, const P p) {
+			    {
+				    t == p
+			    };
+		    }
 		struct EqualTo final
 		{
-			const T Expected;
+			const P Expected;
 
-			explicit EqualTo(T Expected)
+			explicit EqualTo(P Expected)
 			    : Expected(MoveTemp(Expected))
 			{
 			}
@@ -143,12 +145,16 @@ namespace UEST
 		};
 
 		template<typename T, typename P = T>
-		// TODO: Add requires
+		    requires requires(const T t, const P p) {
+			    {
+				    t < p
+			    };
+		    }
 		struct LessThan final
 		{
-			const T Expected;
+			const P Expected;
 
-			explicit LessThan(T Expected)
+			explicit LessThan(P Expected)
 			    : Expected{MoveTemp(Expected)}
 			{
 			}
@@ -165,12 +171,16 @@ namespace UEST
 		};
 
 		template<typename T, typename P = T>
-		// TODO: Add requires
+		    requires requires(const T t, const P p) {
+			    {
+				    t <= p
+			    };
+		    }
 		struct LessThanOrEqualTo final
 		{
-			const T Expected;
+			const P Expected;
 
-			explicit LessThanOrEqualTo(T Expected)
+			explicit LessThanOrEqualTo(P Expected)
 			    : Expected{MoveTemp(Expected)}
 			{
 			}
@@ -187,12 +197,16 @@ namespace UEST
 		};
 
 		template<typename T, typename P = T>
-		// TODO: Add requires
+		    requires requires(const T t, const P p) {
+			    {
+				    t > p
+			    };
+		    }
 		struct GreaterThan final
 		{
-			const T Expected;
+			const P Expected;
 
-			explicit GreaterThan(T Expected)
+			explicit GreaterThan(P Expected)
 			    : Expected{MoveTemp(Expected)}
 			{
 			}
@@ -209,12 +223,16 @@ namespace UEST
 		};
 
 		template<typename T, typename P = T>
-		// TODO: Add requires
+		    requires requires(const T t, const P p) {
+			    {
+				    t >= p
+			    };
+		    }
 		struct GreaterThanOrEqualTo final
 		{
-			const T Expected;
+			const P Expected;
 
-			explicit GreaterThanOrEqualTo(T Expected)
+			explicit GreaterThanOrEqualTo(P Expected)
 			    : Expected{MoveTemp(Expected)}
 			{
 			}
@@ -230,14 +248,21 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P1 = T, typename P2 = T>
-		// TODO: Add requires
+		template<typename T, typename Lower = T, typename Upper = T>
+		    requires requires(const T t, const Lower lower, const Upper upper) {
+			    {
+				    t >= lower
+			    };
+			    {
+				    t <= upper
+			    };
+		    }
 		struct InRange final
 		{
-			const P1 From;
-			const P2 To;
+			const Lower From;
+			const Upper To;
 
-			explicit InRange(P1 From, P2 To)
+			explicit InRange(Lower From, Upper To)
 			    : From{MoveTemp(From)}
 			    , To{MoveTemp(To)}
 			{
