@@ -402,7 +402,7 @@ namespace Is
 		const auto Negative = LessThan<int64>(0);
 
 		template<typename T>
-		using InRange = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::InRange, T, T>, T, T>;
+		using InRange = UEST::Passthrough<UEST::Matchers::Not<UEST::Matchers::InRange, T, T, T>, T, T, T>;
 	} // namespace Not
 } // namespace Is
 

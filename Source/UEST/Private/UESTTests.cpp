@@ -34,8 +34,7 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(-1, Is::Not::Positive);
 
 	ASSERT_THAT(1, Is::InRange<int>(0, 2));
-	// TODO: Doesn't compile. Need more coffee to understand how to fix.
-	// ASSERT_THAT(1, Is::Not::InRange<int>(2, 4));
+	ASSERT_THAT(1, Is::Not::InRange<int>(2, 4));
 }
 
 TEST_CLASS(UEST, SimpleTestClass)
