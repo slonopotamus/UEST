@@ -9,7 +9,7 @@ enum class EScopedGameType : uint8
 	Empty,
 };
 
-class FScopedGameInstance : FNoncopyable
+class UEST_API FScopedGameInstance : FNoncopyable
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
 
@@ -61,7 +61,7 @@ public:
 	}
 };
 
-class FScopedGame
+class UEST_API FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
 	bool bGarbageCollectOnDestroy = true;

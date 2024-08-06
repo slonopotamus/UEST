@@ -20,7 +20,7 @@ namespace UEST
 
 	template<typename T>
 	// TODO: Make this FNoncopyable?
-	struct IMatcher
+	struct UEST_API IMatcher
 	{
 		virtual ~IMatcher() = default;
 
