@@ -6,6 +6,14 @@
 
 #include "Misc/AutomationTest.h"
 
+// TODO: Get rid of Boost
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/comparison/greater.hpp>
+#include <boost/preprocessor/seq/elem.hpp>
+#include <boost/preprocessor/seq/fold_left.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/variadic/to_seq.hpp>
+
 namespace UEST
 {
 	template<typename T>
@@ -28,7 +36,7 @@ namespace UEST
 
 	namespace Matchers
 	{
-		struct Null
+		struct Null final
 		{
 			template<typename T>
 			    requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
@@ -36,14 +44,13 @@ namespace UEST
 			{
 				return Value == nullptr;
 			}
-
 			FString Describe() const
 			{
 				return TEXT("be nullptr");
 			}
 		};
 
-		struct True
+		struct True final
 		{
 			template<typename T>
 			    requires requires(const T t) { { static_cast<bool>(t) }; }
@@ -51,14 +58,13 @@ namespace UEST
 			{
 				return Value;
 			}
-
 			FString Describe() const
 			{
 				return TEXT("be true");
 			}
 		};
 
-		struct False
+		struct False final
 		{
 			template<typename T>
 			    requires requires(const T t) { { static_cast<bool>(t) }; }
@@ -66,10 +72,45 @@ namespace UEST
 			{
 				return !Value;
 			}
-
 			FString Describe() const
 			{
 				return TEXT("be false");
+			}
+		};
+
+		struct Empty final
+		{
+			template<typename T>
+			requires requires(const T t)
+			{
+				{ t.IsEmpty() };
+			}
+			bool Matches(const T& Value) const
+			{
+				return Value.IsEmpty();
+			}
+
+			FString Describe() const
+			{
+				return TEXT("be empty");
+			}
+		};
+
+		struct Valid final
+		{
+			template<typename T>
+			requires requires(const T t)
+			{
+				{ t.IsValid() };
+			}
+			bool Matches(const T& Value) const
+			{
+				return Value.IsValid();
+			}
+
+			FString Describe() const
+			{
+				return TEXT("be valid");
 			}
 		};
 
@@ -280,6 +321,8 @@ namespace Is
 	constexpr auto Null = UEST::Matchers::Null{};
 	constexpr auto True = UEST::Matchers::True{};
 	constexpr auto False = UEST::Matchers::False{};
+	constexpr auto Empty = UEST::Matchers::Empty{};
+	constexpr auto Valid = UEST::Matchers::Valid{};
 
 	template<typename T>
 	using EqualTo = UEST::Matchers::EqualTo<T>;
@@ -314,6 +357,8 @@ namespace Is
 		const auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
 		constexpr auto False = Is::True;
 		constexpr auto True = Is::False;
+		const auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
+		const auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
 
 		template<typename T>
 		using EqualTo = UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T>;
@@ -389,14 +434,6 @@ struct TUESTInstantiator
 	TUniquePtr<TClass> Instance;
 #endif
 };
-
-// TODO: Get rid of Boost
-#include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/comparison/greater.hpp>
-#include <boost/preprocessor/seq/elem.hpp>
-#include <boost/preprocessor/seq/fold_left.hpp>
-#include <boost/preprocessor/stringize.hpp>
-#include <boost/preprocessor/variadic/to_seq.hpp>
 
 #define UEST_CONCAT_SEQ_1(seq, fold_op, elem_op) elem_op(BOOST_PP_SEQ_HEAD(seq))
 #define UEST_CONCAT_SEQ_N(seq, fold_op, elem_op) BOOST_PP_SEQ_FOLD_LEFT(fold_op, elem_op(BOOST_PP_SEQ_HEAD(seq)), BOOST_PP_SEQ_TAIL(seq))

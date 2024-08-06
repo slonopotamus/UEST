@@ -78,6 +78,10 @@ Failed assertion performs `return`, aborting further test execution.
 `ASSERT_THAT(Value, Is::Positive)`:: Shortcut for `ASSERT_THAT(Value, Is::GreaterThan(0))`.
 `ASSERT_THAT(Value, Is::Negative)`:: Shortcut for `ASSERT_THAT(Value, Is::LessThan(0))`.
 `ASSERT_THAT(Value, Is::InRange(From, To))`:: Tests that `Value` is greater than or equal to `From` and is less than or equal to `To`.
+`ASSERT_THAT(Value, Is::Empty)`:: Tests that `Value` is empty using its `IsEmpty()` method.
+Use this for `FString` or collections (`TArray`, `TMap`, etc).
+`ASSERT_THAT(Value, Is::Valid)`:: Tests that `Value` is valid using its `IsValid()` method.
+Use this for `TSharedPtr`, `TWeakObjectPtr` or `TWeakPtr`.
 
 IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] in versions older than 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
 

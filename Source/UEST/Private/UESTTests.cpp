@@ -35,6 +35,11 @@ TEST(UEST, SimpleTest)
 
 	ASSERT_THAT(1, Is::InRange<int>(0, 2));
 	ASSERT_THAT(1, Is::Not::InRange<int>(2, 4));
+
+	ASSERT_THAT(FString{}, Is::Empty);
+	ASSERT_THAT(FString{"abc"}, Is::Not::Empty);
+
+	ASSERT_THAT(TSharedPtr<int>{}, Is::Not::Valid);
 }
 
 TEST_CLASS(UEST, SimpleTestClass)
