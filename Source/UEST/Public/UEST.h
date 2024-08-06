@@ -19,21 +19,20 @@ namespace UEST
 	}
 
 	template<typename M, typename T, typename... P>
-	concept Matcher = requires(M const m, const T& t, P... p)
-	{
+	concept Matcher = requires(M const m, const T& t, P... p) {
 		{ M{p...} };
 		{ m.Matches(t) } -> std::same_as<bool>;
 		{ m.Describe() } -> std::same_as<FString>;
 	};
 
 	template<typename M, typename T, typename... P>
-	requires Matcher<M, T, P...>
+	    requires Matcher<M, T, P...>
 	struct Passthrough
 	{
 		M Matcher;
 
 		explicit Passthrough(P... Args)
-			: Matcher{MoveTemp(Args)...}
+		    : Matcher{MoveTemp(Args)...}
 		{
 		}
 
@@ -121,7 +120,7 @@ namespace UEST
 			}
 		} False;
 
-		template<typename T, typename P=T>
+		template<typename T, typename P = T>
 		// TODO: Add requires
 		struct EqualTo final
 		{
@@ -143,7 +142,7 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P=T>
+		template<typename T, typename P = T>
 		// TODO: Add requires
 		struct LessThan final
 		{
@@ -165,7 +164,7 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P=T>
+		template<typename T, typename P = T>
 		// TODO: Add requires
 		struct LessThanOrEqualTo final
 		{
@@ -187,7 +186,7 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P=T>
+		template<typename T, typename P = T>
 		// TODO: Add requires
 		struct GreaterThan final
 		{
@@ -209,7 +208,7 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P=T>
+		template<typename T, typename P = T>
 		// TODO: Add requires
 		struct GreaterThanOrEqualTo final
 		{
@@ -231,7 +230,7 @@ namespace UEST
 			}
 		};
 
-		template<typename T, typename P1=T, typename P2=T>
+		template<typename T, typename P1 = T, typename P2 = T>
 		// TODO: Add requires
 		struct InRange final
 		{
@@ -260,8 +259,8 @@ namespace UEST
 			}
 		};
 
-		template<template <typename...> typename M, typename T, typename... P>
-		requires Matcher<M<T, P...>, T, P...> 
+		template<template<typename...> typename M, typename T, typename... P>
+		    requires Matcher<M<T, P...>, T, P...>
 		struct Not
 		{
 			M<T, P...> Nested;
