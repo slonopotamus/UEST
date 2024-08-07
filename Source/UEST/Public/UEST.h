@@ -421,6 +421,8 @@ namespace Is
 
 class UEST_API FUESTTestBase : public FAutomationTestBase
 {
+	typedef FAutomationTestBase Super;
+
 protected:
 	FUESTTestBase(const FString& InName);
 
@@ -430,18 +432,29 @@ protected:
 
 	virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override;
 
-	virtual bool RunTest(const FString& Parameters) override;
+	virtual FString GetTestSourceFileName(const FString& InTestName) const override;
+
+	virtual int32 GetTestSourceFileLine(const FString& InTestName) const override;
+
+	virtual bool RunTest(const FString& InTestName) override;
 
 public:
+	struct FTestMethodInfo final
+	{
+		FSimpleDelegate Delegate;
+		const TCHAR* FileName;
+		const int32 FileLine;
+	};
+
 	// TODO: Can we do this without delegates, just using method pointers?
-	TMap<FString, FSimpleDelegate> TestMethods;
+	TMap<FString, FTestMethodInfo> TestMethods;
 };
 
 struct FUESTMethodRegistrar
 {
-	FUESTMethodRegistrar(FString Name, FUESTTestBase& Test, FSimpleDelegate Delegate)
+	FUESTMethodRegistrar(FUESTTestBase& Test, FString&& Name, FUESTTestBase::FTestMethodInfo&& Info)
 	{
-		Test.TestMethods.Add(MoveTemp(Name), MoveTemp(Delegate));
+		Test.TestMethods.Add(MoveTemp(Name), MoveTemp(Info));
 	}
 };
 
@@ -487,14 +500,6 @@ struct TUESTInstantiator
 		{ \
 			return TEXT(PrettyName); \
 		} \
-		virtual FString GetTestSourceFileName() const override \
-		{ \
-			return TEXT(__FILE__); \
-		} \
-		virtual int32 GetTestSourceFileLine() const override \
-		{ \
-			return __LINE__; \
-		} \
 	}; \
 	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
@@ -505,6 +510,14 @@ struct TUESTInstantiator
 #define TEST_WITH_BASE(BaseClass, ...) \
 	TEST_CLASS_WITH_BASE(BaseClass, __VA_ARGS__) \
 	{ \
+		virtual FString GetTestSourceFileName() const override \
+		{ \
+			return TEXT(__FILE__); \
+		} \
+		virtual int32 GetTestSourceFileLine() const override \
+		{ \
+			return __LINE__; \
+		} \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
 			DoTest(Parameters); \
@@ -552,5 +565,5 @@ struct TUESTInstantiator
 #define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, __VA_ARGS__)
 
 #define TEST_METHOD(MethodName) \
-	FUESTMethodRegistrar reg##MethodName{TEXT(#MethodName), *this, FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName)}; \
+	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName), TEXT(__FILE__), __LINE__}}; \
 	void MethodName()
