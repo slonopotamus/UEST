@@ -255,7 +255,7 @@ namespace UEST
 			}
 		};
 
-		struct NaN final : FNoncopyable
+		struct NaN final
 		{
 			template<typename T>
 			    requires std::is_floating_point_v<std::remove_reference_t<T>>
