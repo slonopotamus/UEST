@@ -28,10 +28,14 @@ namespace UEST
 
 	template<typename M, typename... P>
 	concept Matcher = requires(M const m, P... p) {
-		{ M{p...} };
+		{
+			M{p...}
+		};
 		// TODO: Can we require that there exists such template? template<typename T> bool M::Matches(const<T>&)
 		//{ m.Matches(t) } -> std::same_as<bool>;
-		{ m.Describe() } -> std::same_as<FString>;
+		{
+			m.Describe()
+		} -> std::same_as<FString>;
 	};
 
 	namespace Matchers
@@ -82,7 +86,9 @@ namespace UEST
 		{
 			template<typename T>
 			    requires requires(const T t) {
-				    { t.IsEmpty() };
+				    {
+					    t.IsEmpty()
+				    };
 			    }
 			bool Matches(const T& Value) const
 			{
@@ -99,7 +105,9 @@ namespace UEST
 		{
 			template<typename T>
 			    requires requires(const T t) {
-				    { t.IsValid() };
+				    {
+					    t.IsValid()
+				    };
 			    }
 			bool Matches(const T& Value) const
 			{
