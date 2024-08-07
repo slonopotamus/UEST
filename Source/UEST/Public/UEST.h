@@ -81,10 +81,9 @@ namespace UEST
 		struct Empty final
 		{
 			template<typename T>
-			requires requires(const T t)
-			{
-				{ t.IsEmpty() };
-			}
+			    requires requires(const T t) {
+				    { t.IsEmpty() };
+			    }
 			bool Matches(const T& Value) const
 			{
 				return Value.IsEmpty();
@@ -99,10 +98,9 @@ namespace UEST
 		struct Valid final
 		{
 			template<typename T>
-			requires requires(const T t)
-			{
-				{ t.IsValid() };
-			}
+			    requires requires(const T t) {
+				    { t.IsValid() };
+			    }
 			bool Matches(const T& Value) const
 			{
 				return Value.IsValid();
@@ -252,7 +250,7 @@ namespace UEST
 		struct NaN final : FNoncopyable
 		{
 			template<typename T>
-				requires std::is_floating_point_v<std::remove_reference_t<T>>
+			    requires std::is_floating_point_v<std::remove_reference_t<T>>
 			bool Matches(const T& Value) const
 			{
 				return FMath::IsNaN(Value);
@@ -505,7 +503,9 @@ struct TUESTInstantiator
 			return true; \
 		} \
 		void DoTest(const FString& Parameters); \
+		/* clang-format off */ \
 	}; \
+	/* clang-format on */ \
 	void BOOST_PP_CAT(BOOST_PP_CAT(F, UEST_CLASS_NAME(__VA_ARGS__)), Impl)::DoTest(const FString& Parameters)
 
 /**

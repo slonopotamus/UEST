@@ -44,6 +44,12 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(NAN, Is::NaN);
 }
 
+TEST(UEST, Test, With, Deep, Naming)
+{
+	ASSERT_THAT(true, Is::True);
+}
+
+// clang-format off
 TEST_CLASS(UEST, SimpleTestClass)
 {
 	TEST_METHOD(Test1)
@@ -57,11 +63,6 @@ TEST_CLASS(UEST, SimpleTestClass)
 	}
 };
 
-TEST(UEST, Test, With, Deep, Naming)
-{
-	ASSERT_THAT(true, Is::True);
-}
-
 TEST_CLASS(UEST, TestClass, With, Deep, Naming)
 {
 	TEST_METHOD(Test1)
@@ -74,3 +75,4 @@ TEST_CLASS(UEST, TestClass, With, Deep, Naming)
 		ASSERT_THAT(true, Is::True);
 	}
 };
+// clang-format on
