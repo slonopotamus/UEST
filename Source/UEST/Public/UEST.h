@@ -115,7 +115,7 @@ namespace UEST
 		};
 
 		template<typename P>
-		struct EqualTo final
+		struct EqualTo final : FNoncopyable
 		{
 			const P Expected;
 
@@ -142,7 +142,7 @@ namespace UEST
 		};
 
 		template<typename P>
-		struct LessThan final
+		struct LessThan final : FNoncopyable
 		{
 			const P Expected;
 
@@ -169,7 +169,7 @@ namespace UEST
 		};
 
 		template<typename P>
-		struct LessThanOrEqualTo final
+		struct LessThanOrEqualTo final : FNoncopyable
 		{
 			const P Expected;
 
@@ -196,7 +196,7 @@ namespace UEST
 		};
 
 		template<typename P>
-		struct GreaterThan final
+		struct GreaterThan final : FNoncopyable
 		{
 			const P Expected;
 
@@ -223,7 +223,7 @@ namespace UEST
 		};
 
 		template<typename P>
-		struct GreaterThanOrEqualTo final
+		struct GreaterThanOrEqualTo final : FNoncopyable
 		{
 			const P Expected;
 
@@ -249,8 +249,22 @@ namespace UEST
 			}
 		};
 
+		struct NaN final : FNoncopyable
+		{
+			template<typename T>
+				requires std::is_floating_point_v<std::remove_reference_t<T>>
+			bool Matches(const T& Value) const
+			{
+				return FMath::IsNaN(Value);
+			}
+			FString Describe() const
+			{
+				return TEXT("be nullptr");
+			}
+		};
+
 		template<typename Lower, typename Upper = Lower>
-		struct InRange final
+		struct InRange final : FNoncopyable
 		{
 			const Lower From;
 			const Upper To;
@@ -288,7 +302,7 @@ namespace UEST
 
 		template<typename M, typename... P>
 		    requires Matcher<M, P...>
-		struct Not final
+		struct Not final : FNoncopyable
 		{
 			M Nested;
 
@@ -323,6 +337,7 @@ namespace Is
 	constexpr auto False = UEST::Matchers::False{};
 	constexpr auto Empty = UEST::Matchers::Empty{};
 	constexpr auto Valid = UEST::Matchers::Valid{};
+	constexpr auto NaN = UEST::Matchers::NaN{};
 
 	template<typename T>
 	using EqualTo = UEST::Matchers::EqualTo<T>;
@@ -355,10 +370,11 @@ namespace Is
 	namespace Not
 	{
 		const auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
-		constexpr auto False = Is::True;
-		constexpr auto True = Is::False;
+		constexpr auto& False = Is::True;
+		constexpr auto& True = Is::False;
 		const auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
 		const auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
+		const auto NaN = UEST::Matchers::Not<UEST::Matchers::NaN>{};
 
 		template<typename T>
 		using EqualTo = UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T>;

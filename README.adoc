@@ -82,6 +82,8 @@ Failed assertion performs `return`, aborting further test execution.
 Use this for `FString` or collections (`TArray`, `TMap`, etc).
 `ASSERT_THAT(Value, Is::Valid)`:: Tests that `Value` is valid using its `IsValid()` method.
 Use this for `TSharedPtr`, `TWeakObjectPtr` or `TWeakPtr`.
+`ASSERT_THAT(Value, Is::NaN)`:: Tests that `Value` is floating NaN.
+Supports both float and double.
 
 IMPORTANT: Because of the https://github.com/llvm/llvm-project/issues/73093[bug in Clang template type deduction] in versions older than 19.0, matchers with parameters (`LessThan`, `GreaterThan`, `EqualTo` and so on) require explicit template type specification: `ASSERT_THAT(0, Is::LessThan<int>(1))`.
 

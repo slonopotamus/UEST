@@ -40,6 +40,8 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(FString{"abc"}, Is::Not::Empty);
 
 	ASSERT_THAT(TSharedPtr<int>{}, Is::Not::Valid);
+
+	ASSERT_THAT(NAN, Is::NaN);
 }
 
 TEST_CLASS(UEST, SimpleTestClass)
