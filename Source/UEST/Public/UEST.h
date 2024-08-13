@@ -338,12 +338,12 @@ namespace UEST
 
 namespace Is
 {
-	UEST_API constexpr auto Null = UEST::Matchers::Null{};
-	UEST_API constexpr auto True = UEST::Matchers::True{};
-	UEST_API constexpr auto False = UEST::Matchers::False{};
-	UEST_API constexpr auto Empty = UEST::Matchers::Empty{};
-	UEST_API constexpr auto Valid = UEST::Matchers::Valid{};
-	UEST_API constexpr auto NaN = UEST::Matchers::NaN{};
+	constexpr inline auto Null = UEST::Matchers::Null{};
+	constexpr inline auto True = UEST::Matchers::True{};
+	constexpr inline auto False = UEST::Matchers::False{};
+	constexpr inline auto Empty = UEST::Matchers::Empty{};
+	constexpr inline auto Valid = UEST::Matchers::Valid{};
+	constexpr inline auto NaN = UEST::Matchers::NaN{};
 
 	template<typename T>
 	using EqualTo = UEST::Matchers::EqualTo<T>;
@@ -366,21 +366,21 @@ namespace Is
 	template<typename T>
 	using AtLeast = GreaterThanOrEqualTo<T>;
 
-	UEST_API const auto Zero = EqualTo<int64>(0);
-	UEST_API const auto Positive = GreaterThan<int64>(0);
-	UEST_API const auto Negative = LessThan<int64>(0);
+	const auto Zero = EqualTo<int64>(0);
+	const auto Positive = GreaterThan<int64>(0);
+	const auto Negative = LessThan<int64>(0);
 
 	template<typename T>
 	using InRange = UEST::Matchers::InRange<T>;
 
 	namespace Not
 	{
-		UEST_API const auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
-		UEST_API const auto False = Is::True;
-		UEST_API const auto True = Is::False;
-		UEST_API const auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
-		UEST_API const auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
-		UEST_API const auto NaN = UEST::Matchers::Not<UEST::Matchers::NaN>{};
+		const inline auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
+		const inline auto False = Is::True;
+		const inline auto True = Is::False;
+		const inline auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
+		const inline auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
+		const inline auto NaN = UEST::Matchers::Not<UEST::Matchers::NaN>{};
 
 		template<typename T>
 		using EqualTo = UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T>;
@@ -397,11 +397,11 @@ namespace Is
 		template<typename T>
 		using GreaterThanOrEqualTo = UEST::Matchers::LessThan<T>;
 
-		UEST_API const auto Zero = EqualTo<int64>(0);
+		const inline auto Zero = EqualTo<int64>(0);
 
-		UEST_API const auto Positive = GreaterThan<int64>(0);
+		const inline auto Positive = GreaterThan<int64>(0);
 
-		UEST_API const auto Negative = LessThan<int64>(0);
+		const inline auto Negative = LessThan<int64>(0);
 
 		template<typename T>
 		using InRange = UEST::Matchers::Not<UEST::Matchers::InRange<T>, T, T>;
