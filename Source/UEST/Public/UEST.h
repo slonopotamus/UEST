@@ -338,12 +338,12 @@ namespace UEST
 
 namespace Is
 {
-	constexpr auto Null = UEST::Matchers::Null{};
-	constexpr auto True = UEST::Matchers::True{};
-	constexpr auto False = UEST::Matchers::False{};
-	constexpr auto Empty = UEST::Matchers::Empty{};
-	constexpr auto Valid = UEST::Matchers::Valid{};
-	constexpr auto NaN = UEST::Matchers::NaN{};
+	UEST_API constexpr auto Null = UEST::Matchers::Null{};
+	UEST_API constexpr auto True = UEST::Matchers::True{};
+	UEST_API constexpr auto False = UEST::Matchers::False{};
+	UEST_API constexpr auto Empty = UEST::Matchers::Empty{};
+	UEST_API constexpr auto Valid = UEST::Matchers::Valid{};
+	UEST_API constexpr auto NaN = UEST::Matchers::NaN{};
 
 	template<typename T>
 	using EqualTo = UEST::Matchers::EqualTo<T>;
@@ -375,12 +375,12 @@ namespace Is
 
 	namespace Not
 	{
-		const auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
-		constexpr auto& False = Is::True;
-		constexpr auto& True = Is::False;
-		const auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
-		const auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
-		const auto NaN = UEST::Matchers::Not<UEST::Matchers::NaN>{};
+		UEST_API const auto Null = UEST::Matchers::Not<UEST::Matchers::Null>{};
+		UEST_API const auto False = Is::True;
+		UEST_API const auto True = Is::False;
+		UEST_API const auto Empty = UEST::Matchers::Not<UEST::Matchers::Empty>{};
+		UEST_API const auto Valid = UEST::Matchers::Not<UEST::Matchers::Valid>{};
+		UEST_API const auto NaN = UEST::Matchers::Not<UEST::Matchers::NaN>{};
 
 		template<typename T>
 		using EqualTo = UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T>;
@@ -500,6 +500,16 @@ struct TUESTInstantiator
 		{ \
 			return TEXT(PrettyName); \
 		} \
+		using Super::GetTestSourceFileName; \
+		using Super::GetTestSourceFileLine; \
+		virtual FString GetTestSourceFileName() const override \
+		{ \
+			return TEXT(__FILE__); \
+		} \
+		virtual int32 GetTestSourceFileLine() const override \
+		{ \
+			return __LINE__; \
+		} \
 	}; \
 	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
@@ -510,14 +520,6 @@ struct TUESTInstantiator
 #define TEST_WITH_BASE(BaseClass, ...) \
 	TEST_CLASS_WITH_BASE(BaseClass, __VA_ARGS__) \
 	{ \
-		virtual FString GetTestSourceFileName() const override \
-		{ \
-			return TEXT(__FILE__); \
-		} \
-		virtual int32 GetTestSourceFileLine() const override \
-		{ \
-			return __LINE__; \
-		} \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
 			DoTest(Parameters); \
