@@ -366,9 +366,9 @@ namespace Is
 	template<typename T>
 	using AtLeast = GreaterThanOrEqualTo<T>;
 
-	const auto Zero = EqualTo<int64>(0);
-	const auto Positive = GreaterThan<int64>(0);
-	const auto Negative = LessThan<int64>(0);
+	UEST_API const auto Zero = EqualTo<int64>(0);
+	UEST_API const auto Positive = GreaterThan<int64>(0);
+	UEST_API const auto Negative = LessThan<int64>(0);
 
 	template<typename T>
 	using InRange = UEST::Matchers::InRange<T>;
@@ -397,11 +397,11 @@ namespace Is
 		template<typename T>
 		using GreaterThanOrEqualTo = UEST::Matchers::LessThan<T>;
 
-		const auto Zero = EqualTo<int64>(0);
+		UEST_API const auto Zero = EqualTo<int64>(0);
 
-		const auto Positive = GreaterThan<int64>(0);
+		UEST_API const auto Positive = GreaterThan<int64>(0);
 
-		const auto Negative = LessThan<int64>(0);
+		UEST_API const auto Negative = LessThan<int64>(0);
 
 		template<typename T>
 		using InRange = UEST::Matchers::Not<UEST::Matchers::InRange<T>, T, T>;
