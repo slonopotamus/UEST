@@ -424,7 +424,7 @@ class UEST_API FUESTTestBase : public FAutomationTestBase
 	typedef FAutomationTestBase Super;
 
 protected:
-	FUESTTestBase(const FString& InName);
+	FUESTTestBase(const FString& InName, bool bIsComplex);
 
 	virtual uint32 GetRequiredDeviceNum() const override;
 
@@ -482,7 +482,7 @@ struct TUESTInstantiator
 #define UEST_CLASS_NAME_FOLD_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
 #define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_FOLD_OP, UEST_CLASS_NAME_ELEM_OP)
 
-#define TEST_CLASS_WITH_BASE_IMPL(BaseClass, ClassName, PrettyName) \
+#define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, ClassName, PrettyName) \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
 	struct BOOST_PP_CAT(F, ClassName) \
 	    : public BaseClass \
@@ -491,11 +491,13 @@ struct TUESTInstantiator
 		typedef BaseClass Super; \
 		BOOST_PP_CAT(F, ClassName) \
 		() \
-		    : Super(TEXT(PrettyName)) \
+		    : Super(TEXT(PrettyName), bIsComplex) \
 		{ \
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
+		/* TODO: Only add this when bIsComplex is true */ \
+		virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override; \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
 			return TEXT(PrettyName); \
@@ -511,14 +513,15 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
+	void BOOST_PP_CAT(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const { Super::GetTests(OutBeautifiedNames, OutTestCommands); } \
 	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
 	    : public BOOST_PP_CAT(F, ClassName)
 
-#define TEST_CLASS_WITH_BASE(BaseClass, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
+#define TEST_CLASS_WITH_BASE(BaseClass, bIsComplex, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
 
 #define TEST_WITH_BASE(BaseClass, ...) \
-	TEST_CLASS_WITH_BASE(BaseClass, __VA_ARGS__) \
+	TEST_CLASS_WITH_BASE(BaseClass, false, __VA_ARGS__) \
 	{ \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
@@ -564,7 +567,7 @@ struct TUESTInstantiator
  *     // You can put helper fields or methods here
  * }
  */
-#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, __VA_ARGS__)
+#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, true, __VA_ARGS__)
 
 #define TEST_METHOD(MethodName) \
 	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName), TEXT(__FILE__), __LINE__}}; \

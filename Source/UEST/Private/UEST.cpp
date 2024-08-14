@@ -2,8 +2,8 @@
 
 #include "Modules/ModuleManager.h"
 
-FUESTTestBase::FUESTTestBase(const FString& InName)
-    : FAutomationTestBase(InName, false)
+FUESTTestBase::FUESTTestBase(const FString& InName, bool bIsComplex)
+    : FAutomationTestBase(InName, bIsComplex)
 {
 }
 
