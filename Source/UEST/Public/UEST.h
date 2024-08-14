@@ -513,7 +513,10 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
-	void BOOST_PP_CAT(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const { Super::GetTests(OutBeautifiedNames, OutTestCommands); } \
+	void BOOST_PP_CAT(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const \
+	{ \
+		Super::GetTests(OutBeautifiedNames, OutTestCommands); \
+	} \
 	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
 	    : public BOOST_PP_CAT(F, ClassName)
