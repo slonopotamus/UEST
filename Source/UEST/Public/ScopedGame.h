@@ -17,7 +17,7 @@ class UEST_API FScopedGameInstance : FNoncopyable
 
 	static void DestroyGameInternal(UGameInstance& Game);
 
-	int32 LastInstanceId;
+	int32 LastPIEInstance;
 
 	bool bGarbageCollectOnDestroy;
 

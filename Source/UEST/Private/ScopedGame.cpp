@@ -6,6 +6,7 @@
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
 #include "Net/OnlineEngineInterface.h"
+#include "UESTGameInstance.h"
 
 struct TGWorldGuard final : FNoncopyable
 {
@@ -58,7 +59,7 @@ static TUniquePtr<FCVarsGuard> CVarsGuard;
 
 FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
-    , LastInstanceId{0}
+    , LastPIEInstance{0}
     , bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
 {
 	if (NumScopedGames == 0)
@@ -77,7 +78,7 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 FScopedGameInstance::FScopedGameInstance(FScopedGameInstance&& Other)
     : GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
     , Games{MoveTemp(Other.Games)}
-    , LastInstanceId{Other.LastInstanceId}
+    , LastPIEInstance{Other.LastPIEInstance}
     , bGarbageCollectOnDestroy{Other.bGarbageCollectOnDestroy}
 {
 	++NumScopedGames;
@@ -109,14 +110,32 @@ FScopedGameInstance::~FScopedGameInstance()
 
 UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const FString& MapToLoad, const bool bWaitForConnect)
 {
-	auto Game = NewObject<UGameInstance>(GEngine, GameInstanceClass);
+	auto* Game = NewObject<UGameInstance>(GEngine, GameInstanceClass);
+	if (!ensureAlwaysMsgf(Game, TEXT("Failed to create game instance")))
+	{
+		return nullptr;
+	}
+
 	Games.Emplace(Game);
-	Game->InitializeStandalone();
+
+	const auto bRunAsDedicated = Type == EScopedGameType::Server;
+	const auto PIEInstance = ++LastPIEInstance;
+
+	if (auto* TestableGame = Cast<IUESTGameInstance>(Game))
+	{
+		TestableGame->InitializeForTests(bRunAsDedicated, PIEInstance);
+	}
+	else
+	{
+		IUESTGameInstance::DefaultInitializeForTests(*Game, bRunAsDedicated, PIEInstance);
+	}
 
 	auto* WorldContext = Game->GetWorldContext();
-	WorldContext->PIEInstance = ++LastInstanceId;
-	WorldContext->PIEPrefix = UWorld::BuildPIEPackagePrefix(WorldContext->PIEInstance);
-	WorldContext->RunAsDedicated = Type == EScopedGameType::Server;
+	if (!ensureAlways(WorldContext))
+	{
+		DestroyGame(Game);
+		return nullptr;
+	}
 
 	if (Type == EScopedGameType::Client)
 	{
