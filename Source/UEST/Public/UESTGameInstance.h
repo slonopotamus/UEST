@@ -16,7 +16,6 @@ class UEST_API IUESTGameInstance
 {
 	GENERATED_BODY()
 public:
-
 	virtual void InitializeForTests(const bool bRunAsDedicated, int32 PIEInstance) = 0;
 
 	static void DefaultInitializeForTests(UGameInstance& GameInstance, bool bRunAsDedicated, int32 PIEInstance);

@@ -18,7 +18,6 @@ TEST(UEST, ScopedGame, Simple)
 		Tester.CreateClientFor(Server);
 	}
 
-	
 	// You can access game worlds
 	UWorld* ServerWorld = Server->GetWorld();
 	ASSERT_THAT(ServerWorld, Is::Not::Null);

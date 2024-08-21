@@ -4,9 +4,11 @@
 // UGameInstance::WorldContext is not public, and neither InitializeStandalone nor InitializeForPlayInEditor is suitable for us.
 // So we use this template hack to access WorldContext field.
 // Source: https://ledas.com/post/857-how-to-hack-c-with-templates-and-friends/
-template<FWorldContext* UGameInstance::* WorldContext>
-struct Stealer {
-	static friend FWorldContext*& FieldGetter(UGameInstance& GameInstance) {
+template<FWorldContext* UGameInstance::*WorldContext>
+struct Stealer
+{
+	static friend FWorldContext*& FieldGetter(UGameInstance& GameInstance)
+	{
 		return GameInstance.*WorldContext;
 	}
 };
@@ -31,6 +33,6 @@ void IUESTGameInstance::DefaultInitializeForTests(UGameInstance& GameInstance, c
 	auto* DummyWorld = UWorld::CreateWorld(WorldType, true);
 	DummyWorld->SetGameInstance(&GameInstance);
 	WorldContext.SetCurrentWorld(DummyWorld);
-	
+
 	GameInstance.Init();
 }
