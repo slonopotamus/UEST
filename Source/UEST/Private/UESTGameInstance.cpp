@@ -4,9 +4,11 @@
 // UGameInstance::WorldContext is not public, and neither InitializeStandalone nor InitializeForPlayInEditor is suitable for us.
 // So we use this template hack to access WorldContext field.
 // Source: https://ledas.com/post/857-how-to-hack-c-with-templates-and-friends/
-template<typename T, auto T::* Field, typename RetVal>
-struct Stealer {
-	static friend RetVal& FieldGetter(T& Object) {
+template<typename T, auto T::*Field, typename RetVal>
+struct Stealer
+{
+	static friend RetVal& FieldGetter(T& Object)
+	{
 		return Object.*Field;
 	}
 };
