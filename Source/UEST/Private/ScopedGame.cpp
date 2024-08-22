@@ -8,14 +8,14 @@
 #include "Net/OnlineEngineInterface.h"
 #include "UESTGameInstance.h"
 
-struct TGWorldGuard final : FNoncopyable
+struct FGWorldGuard final : FNoncopyable
 {
-	TGWorldGuard()
+	FGWorldGuard()
 	    : OldWorld{GWorld}
 	{
 	}
 
-	~TGWorldGuard()
+	~FGWorldGuard()
 	{
 		GWorld = OldWorld;
 	}
@@ -158,7 +158,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 			URL.AddOption(TEXT("listen"));
 		}
 
-		TGWorldGuard GWorldGuard;
+		FGWorldGuard GWorldGuard;
 
 		FString Error;
 		const auto BrowseResult = Game->GetEngine()->Browse(*WorldContext, URL, Error);
@@ -304,7 +304,7 @@ void FScopedGameInstance::TickInternal(const float DeltaSeconds, const ELevelTic
 
 	for (const auto& Game : Games)
 	{
-		const TGWorldGuard GWorldGuard;
+		const FGWorldGuard GWorldGuard;
 		const TGuardValue GPlayInEditorInstanceIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
 
 		Game->GetEngine()->TickWorldTravel(*Game->GetWorldContext(), DeltaSeconds);
