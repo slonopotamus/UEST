@@ -247,6 +247,11 @@ UGameInstance* FScopedGameInstance::CreateClientFor(const UGameInstance* Server,
 
 void FScopedGameInstance::DestroyGameInternal(UGameInstance& Game)
 {
+	if (const auto* WorldContext = Game.GetWorldContext())
+	{
+		FreePIEInstances.Push(WorldContext->PIEInstance);
+	}
+
 	const auto OnlineSubsystemId = UOnlineEngineInterface::Get()->GetOnlineIdentifier(*Game.GetWorldContext());
 	const auto World = Game.GetWorld();
 	World->BeginTearingDown();
@@ -292,11 +297,6 @@ bool FScopedGameInstance::DestroyGame(UGameInstance* Game)
 		if (Games[Index].Get() != Game)
 		{
 			continue;
-		}
-
-		if (const auto* WorldContext = Game->GetWorldContext())
-		{
-			FreePIEInstances.Push(WorldContext->PIEInstance);
 		}
 
 		DestroyGameInternal(*Game);
