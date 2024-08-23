@@ -55,11 +55,13 @@ struct FCVarsGuard final : FNoncopyable
 
 static int32 NumScopedGames = 0;
 
+// We are limited by MAX_PIE_INSTANCES :(
+static TArray<int32> FreePIEInstances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
 static TUniquePtr<FCVarsGuard> CVarsGuard;
 
 FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
-    , LastPIEInstance{0}
     , bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
 {
 	if (NumScopedGames == 0)
@@ -78,7 +80,6 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 FScopedGameInstance::FScopedGameInstance(FScopedGameInstance&& Other)
     : GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
     , Games{MoveTemp(Other.Games)}
-    , LastPIEInstance{Other.LastPIEInstance}
     , bGarbageCollectOnDestroy{Other.bGarbageCollectOnDestroy}
 {
 	++NumScopedGames;
@@ -110,6 +111,11 @@ FScopedGameInstance::~FScopedGameInstance()
 
 UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const FString& MapToLoad, const bool bWaitForConnect)
 {
+	if (!ensureAlwaysMsgf(!FreePIEInstances.IsEmpty(), TEXT("Attempt to create too many games at the same time!")))
+	{
+		return nullptr;
+	}
+
 	auto* Game = NewObject<UGameInstance>(GEngine, GameInstanceClass);
 	if (!ensureAlwaysMsgf(Game, TEXT("Failed to create game instance")))
 	{
@@ -118,9 +124,9 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 
 	Games.Emplace(Game);
 
-	const auto bRunAsDedicated = Type == EScopedGameType::Server;
-	const auto PIEInstance = ++LastPIEInstance;
+	int32 PIEInstance = FreePIEInstances.Pop();
 
+	const auto bRunAsDedicated = Type == EScopedGameType::Server;
 	if (auto* TestableGame = Cast<IUESTGameInstance>(Game))
 	{
 		TestableGame->InitializeForTests(bRunAsDedicated, PIEInstance);
@@ -136,6 +142,8 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 		DestroyGame(Game);
 		return nullptr;
 	}
+
+	ensureAlwaysMsgf(WorldContext->PIEInstance == PIEInstance, TEXT("WorldContext must use supplied PIEInstance"));
 
 	if (Type == EScopedGameType::Client)
 	{
@@ -158,7 +166,9 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 			URL.AddOption(TEXT("listen"));
 		}
 
-		FGWorldGuard GWorldGuard;
+		const TGuardValue GIsPlayInEditorWorldGuard(GIsPlayInEditorWorld, false);
+		const TGuardValue GPlayInEditorIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
+		const FGWorldGuard GWorldGuard;
 
 		FString Error;
 		const auto BrowseResult = Game->GetEngine()->Browse(*WorldContext, URL, Error);
@@ -284,6 +294,11 @@ bool FScopedGameInstance::DestroyGame(UGameInstance* Game)
 			continue;
 		}
 
+		if (const auto* WorldContext = Game->GetWorldContext())
+		{
+			FreePIEInstances.Push(WorldContext->PIEInstance);
+		}
+
 		DestroyGameInternal(*Game);
 		Games.RemoveAt(Index);
 
@@ -304,8 +319,9 @@ void FScopedGameInstance::TickInternal(const float DeltaSeconds, const ELevelTic
 
 	for (const auto& Game : Games)
 	{
+		const TGuardValue GIsPlayInEditorWorldGuard(GIsPlayInEditorWorld, false);
+		const TGuardValue GPlayInEditorIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
 		const FGWorldGuard GWorldGuard;
-		const TGuardValue GPlayInEditorInstanceIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
 
 		Game->GetEngine()->TickWorldTravel(*Game->GetWorldContext(), DeltaSeconds);
 		Game->GetWorld()->Tick(TickType, DeltaSeconds);

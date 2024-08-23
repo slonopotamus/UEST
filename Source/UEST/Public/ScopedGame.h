@@ -17,8 +17,6 @@ class UEST_API FScopedGameInstance : FNoncopyable
 
 	static void DestroyGameInternal(UGameInstance& Game);
 
-	int32 LastPIEInstance;
-
 	bool bGarbageCollectOnDestroy;
 
 	void TickInternal(float DeltaSeconds, const ELevelTick TickType);
