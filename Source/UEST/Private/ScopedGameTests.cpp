@@ -14,7 +14,8 @@ TEST(UEST, ScopedGame, Simple)
 	UGameInstance* Client = Tester.CreateClientFor(Server);
 	ASSERT_THAT(Client, Is::Not::Null);
 
-	// Actually, you can connect as many clients as you want! (Unfortunately, max number of game instances is, see MAX_PIE_INSTANCES in UE sources)
+	// Actually, you can connect as many clients as you want!
+	// Well, almost. Max number of simultaneous game instances is 10, see MAX_PIE_INSTANCES in UE sources.
 	for (int32 Index = 0; Index < 5; ++Index)
 	{
 		Tester.CreateClientFor(Server);
