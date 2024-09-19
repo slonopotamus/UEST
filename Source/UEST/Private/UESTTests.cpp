@@ -75,4 +75,32 @@ TEST_CLASS(UEST, TestClass, With, Deep, Naming)
 		ASSERT_THAT(true, Is::True);
 	}
 };
+
+TEST_CLASS(UEST, BeforeAfter)
+{
+	int32 BeforeCalled = 0;
+	int32 AfterCalled = 0;
+
+	BEFORE_EACH()
+	{
+		BeforeCalled++;
+	}
+
+	AFTER_EACH()
+	{
+		AfterCalled++;
+	}
+
+	TEST_METHOD(Test1)
+	{
+		ASSERT_THAT(BeforeCalled, Is::EqualTo<int>(1));
+		ASSERT_THAT(AfterCalled, Is::EqualTo<int>(0));
+	}
+
+	TEST_METHOD(Test2)
+	{
+		ASSERT_THAT(BeforeCalled, Is::EqualTo<int>(2));
+		ASSERT_THAT(AfterCalled, Is::EqualTo<int>(1));
+	}
+};
 // clang-format on

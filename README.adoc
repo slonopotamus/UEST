@@ -60,6 +60,28 @@ TEST_CLASS(MyFancyTestClass)
 }
 ----
 
+If you want to execute a common piece of logic before and after each test method in a test class, you can do that using `BEFORE_EACH`/`AFTER_EACH` macros:
+
+[source,cpp]
+----
+#include "UEST.h"
+
+TEST_CLASS(MyFancyTestClass)
+{
+    BEFORE_EACH()
+    {
+        // Place code that will be executed before each test method of this class
+    }
+
+    AFTER_EACH()
+    {
+        // Place code that will be executed after each test method of this class
+    }
+
+    ...
+}
+----
+
 === Assertions
 
 All UEST assertions are done through `ASSERT_THAT(Expression, Matcher)`.
@@ -154,7 +176,6 @@ TEST(MyGame, SimpleMultiplayerTest)
 
 == Further development plans
 
-* `BEFORE_EACH`/`AFTER_EACH` to `TEST_CLASS`
 * More matchers
 * Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them, also known as "soft assertions".
 * Add API to disable tests (with `EAutomationTestFlags::Disabled` under the hood)

@@ -48,6 +48,7 @@ namespace UEST
 			{
 				return Value == nullptr;
 			}
+
 			FString Describe() const
 			{
 				return TEXT("be nullptr");
@@ -62,6 +63,7 @@ namespace UEST
 			{
 				return Value;
 			}
+
 			FString Describe() const
 			{
 				return TEXT("be true");
@@ -76,6 +78,7 @@ namespace UEST
 			{
 				return !Value;
 			}
+
 			FString Describe() const
 			{
 				return TEXT("be false");
@@ -366,9 +369,9 @@ namespace Is
 	template<typename T>
 	using AtLeast = GreaterThanOrEqualTo<T>;
 
-	const auto Zero = EqualTo<int64>(0);
-	const auto Positive = GreaterThan<int64>(0);
-	const auto Negative = LessThan<int64>(0);
+	const inline auto Zero = EqualTo<int64>(0);
+	const inline auto Positive = GreaterThan<int64>(0);
+	const inline auto Negative = LessThan<int64>(0);
 
 	template<typename T>
 	using InRange = UEST::Matchers::InRange<T>;
@@ -413,7 +416,9 @@ namespace Is
 	do \
 	{ \
 		const auto& _M = Matcher; \
-		if (!ensureAlwaysMsgf(_M.Matches<decltype(Value)>(Value), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(Value), *_M.Describe())) \
+		/* TODO: Can we make this const auto& ? */ \
+		const auto _V = Value; \
+		if (!ensureAlwaysMsgf(_M.Matches<decltype(_V)>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
 		{ \
 			return; \
 		} \
@@ -437,6 +442,10 @@ protected:
 	virtual int32 GetTestSourceFileLine(const FString& InTestName) const override;
 
 	virtual bool RunTest(const FString& InTestName) override;
+
+	virtual void Setup() {}
+
+	virtual void TearDown() {}
 
 public:
 	struct FTestMethodInfo final
@@ -575,3 +584,6 @@ struct TUESTInstantiator
 #define TEST_METHOD(MethodName) \
 	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName), TEXT(__FILE__), __LINE__}}; \
 	void MethodName()
+
+#define BEFORE_EACH() virtual void Setup() override
+#define AFTER_EACH() virtual void TearDown() override

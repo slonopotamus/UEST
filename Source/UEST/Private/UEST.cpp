@@ -78,8 +78,14 @@ bool FUESTTestBase::RunTest(const FString& InTestName)
 	{
 		if (const auto* TestInfo = TestMethods.Find(InTestName); ensure(TestInfo))
 		{
-			// TODO: Add things like BEFORE_EACH() {...}, AFTER_EACH() {...}?
-			TestInfo->Delegate.Execute();
+			Setup();
+
+			if (!HasAnyErrors())
+			{
+				TestInfo->Delegate.Execute();
+			}
+
+			TearDown();
 		}
 	}
 
