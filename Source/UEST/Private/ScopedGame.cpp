@@ -119,7 +119,7 @@ struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScop
 	}
 };
 #else
-struct FGPlayInEditorIDGuard final : TGuardValue<FPlayInEditorID, int32>
+struct FGPlayInEditorIDGuard final : TGuardValue<decltype(GPlayInEditorID), int32>
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
 	    : TGuardValue(GPlayInEditorID, PlayInEditorID)
