@@ -5,6 +5,7 @@
 #include "GameMapsSettings.h"
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
+#include "Misc/PlayInEditorLoadingScope.h"
 #include "Net/OnlineEngineInterface.h"
 #include "UESTGameInstance.h"
 
@@ -109,6 +110,22 @@ FScopedGameInstance::~FScopedGameInstance()
 	}
 }
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MAJOR_VERSION >= 5)
+struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScope
+{
+	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
+		: FPlayInEditorLoadingScope(PlayInEditorID)
+	{}
+};
+#else
+struct FGPlayInEditorIDGuard final : TGuardValue<int32>
+{
+	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
+		: TGuardValue(GPlayInEditorID, PlayInEditorID)
+	{}
+};
+#endif
+
 UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const FString& MapToLoad, const bool bWaitForConnect)
 {
 	if (!ensureAlwaysMsgf(!FreePIEInstances.IsEmpty(), TEXT("Attempt to create too many games at the same time!")))
@@ -167,7 +184,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const
 		}
 
 		const TGuardValue GIsPlayInEditorWorldGuard(GIsPlayInEditorWorld, false);
-		const TGuardValue GPlayInEditorIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
+		const FGPlayInEditorIDGuard GPlayInEditorIDGuard(Game->GetWorldContext()->PIEInstance);
 		const FGWorldGuard GWorldGuard;
 
 		FString Error;
@@ -320,7 +337,7 @@ void FScopedGameInstance::TickInternal(const float DeltaSeconds, const ELevelTic
 	for (const auto& Game : Games)
 	{
 		const TGuardValue GIsPlayInEditorWorldGuard(GIsPlayInEditorWorld, false);
-		const TGuardValue GPlayInEditorIDGuard(GPlayInEditorID, Game->GetWorldContext()->PIEInstance);
+		const FGPlayInEditorIDGuard GPlayInEditorIDGuard(Game->GetWorldContext()->PIEInstance);
 		const FGWorldGuard GWorldGuard;
 
 		Game->GetEngine()->TickWorldTravel(*Game->GetWorldContext(), DeltaSeconds);

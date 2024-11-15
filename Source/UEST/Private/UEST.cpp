@@ -12,10 +12,17 @@ uint32 FUESTTestBase::GetRequiredDeviceNum() const
 	return 1;
 }
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MAJOR_VERSION >= 5)
+EAutomationTestFlags FUESTTestBase::GetTestFlags() const
+{
+	return EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter;
+}
+#else
 uint32 FUESTTestBase::GetTestFlags() const
 {
 	return EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
 }
+#endif
 
 void FUESTTestBase::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
 {
