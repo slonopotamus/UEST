@@ -12,7 +12,7 @@ uint32 FUESTTestBase::GetRequiredDeviceNum() const
 	return 1;
 }
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MAJOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
 EAutomationTestFlags FUESTTestBase::GetTestFlags() const
 {
 	return EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter;

@@ -110,7 +110,7 @@ FScopedGameInstance::~FScopedGameInstance()
 	}
 }
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MAJOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
 struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScope
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
@@ -118,7 +118,7 @@ struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScop
 	{}
 };
 #else
-struct FGPlayInEditorIDGuard final : TGuardValue<int32>
+struct FGPlayInEditorIDGuard final : TGuardValue<FPlayInEditorID, int32>
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
 		: TGuardValue(GPlayInEditorID, PlayInEditorID)

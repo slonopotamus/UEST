@@ -433,7 +433,7 @@ protected:
 
 	virtual uint32 GetRequiredDeviceNum() const override;
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MAJOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
 	virtual EAutomationTestFlags GetTestFlags() const override;
 #else
 	virtual uint32 GetTestFlags() const override;
