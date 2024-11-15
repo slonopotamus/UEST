@@ -114,15 +114,17 @@ FScopedGameInstance::~FScopedGameInstance()
 struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScope
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
-		: FPlayInEditorLoadingScope(PlayInEditorID)
-	{}
+	    : FPlayInEditorLoadingScope(PlayInEditorID)
+	{
+	}
 };
 #else
 struct FGPlayInEditorIDGuard final : TGuardValue<FPlayInEditorID, int32>
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
-		: TGuardValue(GPlayInEditorID, PlayInEditorID)
-	{}
+	    : TGuardValue(GPlayInEditorID, PlayInEditorID)
+	{
+	}
 };
 #endif
 
