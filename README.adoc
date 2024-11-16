@@ -208,7 +208,6 @@ bool FMyTest::RunTest(const FString& Parameters)
 * Assertions do not capture expression that is being tested.
 You have to write descriptive messages by hand.
 * Overcomplicated way to add multiple tests with common logic.
-`IMPLEMENT_COMPLEX_AUTOMATION_TEST` cannot be understood by IDEs at all.
 
 .The ugly
 * You need to write your test name *three times* as if it isn't clear enough what test name actually is.
