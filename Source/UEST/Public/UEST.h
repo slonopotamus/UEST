@@ -418,7 +418,7 @@ namespace Is
 		const auto& _M = Matcher; \
 		/* TODO: Can we make this const auto& ? */ \
 		const auto _V = Value; \
-		if (!ensureAlwaysMsgf(_M.Matches<decltype(_V)>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
+		if (!ensureAlwaysMsgf(_M.template Matches<decltype(_V)>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
 		{ \
 			return; \
 		} \
