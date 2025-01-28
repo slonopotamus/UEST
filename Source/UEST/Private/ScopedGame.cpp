@@ -273,7 +273,6 @@ void FScopedGameInstance::DestroyGameInternal(UGameInstance& Game)
 
 	const auto OnlineSubsystemId = UOnlineEngineInterface::Get()->GetOnlineIdentifier(*Game.GetWorldContext());
 	const auto World = Game.GetWorld();
-	World->BeginTearingDown();
 
 	// This is an equivalent of UEngine::CleanupGameViewport, but for a single GameInstance
 	{
@@ -284,10 +283,16 @@ void FScopedGameInstance::DestroyGameInternal(UGameInstance& Game)
 		}
 	}
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+	World->EndPlay(EEndPlayReason::EndPlayInEditor);
+#else
+	World->BeginTearingDown();
+
 	for (FActorIterator ActorIt(World); ActorIt; ++ActorIt)
 	{
-		ActorIt->RouteEndPlay(EEndPlayReason::Quit);
+		ActorIt->RouteEndPlay(EEndPlayReason::EndPlayInEditor);
 	}
+#endif
 
 	Game.GetEngine()->ShutdownWorldNetDriver(World);
 
