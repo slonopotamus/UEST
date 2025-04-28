@@ -38,7 +38,7 @@ public:
 
 	virtual ~FScopedGameInstance();
 
-	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, const FString& MapToLoad = TEXT(""), bool bWaitForConnect = true);
+	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, FString MapToLoad = TEXT(""), bool bWaitForConnect = true);
 
 	UGameInstance* CreateClientFor(const UGameInstance* Server, const bool bWaitForConnect = true);
 

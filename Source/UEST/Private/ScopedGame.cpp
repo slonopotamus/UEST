@@ -128,11 +128,16 @@ struct FGPlayInEditorIDGuard final : TGuardValue<decltype(GPlayInEditorID), int3
 };
 #endif
 
-UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, const FString& MapToLoad, const bool bWaitForConnect)
+UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FString MapToLoad, const bool bWaitForConnect)
 {
 	if (!ensureAlwaysMsgf(!FreePIEInstances.IsEmpty(), TEXT("Attempt to create too many games at the same time!")))
 	{
 		return nullptr;
+	}
+
+	if (MapToLoad.IsEmpty())
+	{
+		MapToLoad = GetDefault<UGameMapsSettings>()->GetGameDefaultMap();
 	}
 
 	auto* Game = NewObject<UGameInstance>(GEngine, GameInstanceClass);
