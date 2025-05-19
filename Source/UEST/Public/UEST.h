@@ -4,6 +4,7 @@
 #include "Assert/CQTestConvert.h"
 #endif
 
+#include "Elements/Common/TypedElementCommonTypes.h"
 #include "Misc/AutomationTest.h"
 
 // TODO: Get rid of Boost
@@ -35,7 +36,7 @@ namespace UEST
 		//{ m.Matches(t) } -> std::same_as<bool>;
 		{
 			m.Describe()
-		} -> std::same_as<FString>;
+		} -> UE::same_as<FString>;
 	};
 
 	namespace Matchers

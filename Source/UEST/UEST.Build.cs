@@ -12,6 +12,7 @@ public class UEST : ModuleRules
 			"Engine",
 			"EngineSettings",
 			"IrisCore",
+			"TypedElementFramework",
 		});
 
 		if (Target.bBuildDeveloperTools)
