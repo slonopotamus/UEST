@@ -17,11 +17,11 @@ class UEST_API FScopedGameInstance : FNoncopyable
 
 	static void DestroyGameInternal(UGameInstance& Game);
 
-	bool bGarbageCollectOnDestroy;
-
 	void TickInternal(float DeltaSeconds, const ELevelTick TickType);
 
 	static UObject* StaticFindReplicatedObjectIn(UObject* Object, const UWorld* World);
+
+	static void CollectGarbage();
 
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;
@@ -32,7 +32,7 @@ public:
 		bool bEnsureIfVariableNotFound;
 	};
 
-	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars);
+	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars);
 
 	FScopedGameInstance(FScopedGameInstance&& Other);
 
@@ -62,7 +62,6 @@ public:
 class UEST_API FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
-	bool bGarbageCollectOnDestroy = true;
 	TMap<FString, FScopedGameInstance::FCVarConfig> CVars;
 
 public:
@@ -77,12 +76,6 @@ public:
 	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bEnsureIfVariableNotFound = true)
 	{
 		CVars.Add(MoveTemp(Name), {MoveTemp(Value), bEnsureIfVariableNotFound});
-		return *this;
-	}
-
-	FScopedGame& WithGarbageCollectOnDestroy(const bool bInGarbageCollectOnDestroy)
-	{
-		bGarbageCollectOnDestroy = bInGarbageCollectOnDestroy;
 		return *this;
 	}
 

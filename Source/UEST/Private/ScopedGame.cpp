@@ -61,9 +61,8 @@ static TArray<int32> FreePIEInstances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 static TUniquePtr<FCVarsGuard> CVarsGuard;
 
-FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const bool bGarbageCollectOnDestroy, const TMap<FString, FCVarConfig>& CVars)
+FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
-    , bGarbageCollectOnDestroy{bGarbageCollectOnDestroy}
 {
 	if (NumScopedGames == 0)
 	{
@@ -81,7 +80,6 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 FScopedGameInstance::FScopedGameInstance(FScopedGameInstance&& Other)
     : GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
     , Games{MoveTemp(Other.Games)}
-    , bGarbageCollectOnDestroy{Other.bGarbageCollectOnDestroy}
 {
 	++NumScopedGames;
 }
@@ -93,13 +91,12 @@ FScopedGameInstance::~FScopedGameInstance()
 		DestroyGameInternal(*Game);
 	}
 
-	const bool bCollectGarbage = bGarbageCollectOnDestroy && !Games.IsEmpty();
+	const bool bCollectGarbage = !Games.IsEmpty();
 	Games.Empty();
 
 	if (bCollectGarbage)
 	{
-		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-		GEngine->CheckAndHandleStaleWorldObjectReferences();
+		CollectGarbage();
 	}
 
 	--NumScopedGames;
@@ -331,6 +328,7 @@ bool FScopedGameInstance::DestroyGame(UGameInstance* Game)
 		DestroyGameInternal(*Game);
 		Games.RemoveAt(Index);
 
+		CollectGarbage();
 		return true;
 	}
 
@@ -424,6 +422,27 @@ UObject* FScopedGameInstance::StaticFindReplicatedObjectIn(UObject* Object, cons
 	return nullptr;
 }
 
+void FScopedGameInstance::CollectGarbage()
+{
+	// find objects like Textures in the playworld levels that won't get garbage collected as they are marked RF_Standalone
+	for (FThreadSafeObjectIterator It; It; ++It)
+	{
+		UObject* Object = *It;
+
+		if (Object->GetOutermost()->HasAnyPackageFlags(PKG_PlayInEditor))
+		{
+			if (Object->HasAnyFlags(RF_Standalone))
+			{
+				// Clear RF_Standalone flag from objects in the levels used for PIE so they get cleaned up.
+				Object->ClearFlags(RF_Standalone);
+			}
+		}
+	}
+
+	::CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+	GEngine->CheckAndHandleStaleWorldObjectReferences();
+}
+
 void FScopedGameInstance::Tick(const float DeltaSeconds, const float StepSeconds, const ELevelTick TickType)
 {
 	if (!ensureMsgf(StepSeconds > 0, TEXT("Tick step must be positive: %f"), StepSeconds))
@@ -480,5 +499,5 @@ FScopedGame::FScopedGame()
 
 FScopedGameInstance FScopedGame::Create() const
 {
-	return FScopedGameInstance{GameInstanceClass, bGarbageCollectOnDestroy, CVars};
+	return FScopedGameInstance{GameInstanceClass, CVars};
 }
