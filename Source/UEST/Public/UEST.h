@@ -434,12 +434,6 @@ protected:
 
 	virtual uint32 GetRequiredDeviceNum() const override;
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
-	virtual EAutomationTestFlags GetTestFlags() const override;
-#else
-	virtual uint32 GetTestFlags() const override;
-#endif
-
 	virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override;
 
 	virtual FString GetTestSourceFileName(const FString& InTestName) const override;
@@ -496,7 +490,13 @@ struct TUESTInstantiator
 #define UEST_CLASS_NAME_FOLD_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
 #define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_FOLD_OP, UEST_CLASS_NAME_ELEM_OP)
 
-#define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, ClassName, PrettyName) \
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+#define UEST_GET_TEST_FLAGS_RETURN_TYPE EAutomationTestFlags
+#else
+#define UEST_GET_TEST_FLAGS_RETURN_TYPE uint32
+#endif
+
+#define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, ClassName, PrettyName) \
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
 	struct BOOST_PP_CAT(F, ClassName) \
 	    : public BaseClass \
@@ -515,6 +515,10 @@ struct TUESTInstantiator
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
 			return TEXT(PrettyName); \
+		} \
+		virtual UEST_GET_TEST_FLAGS_RETURN_TYPE GetTestFlags() const override \
+		{ \
+			return EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter | Flags; \
 		} \
 		using Super::GetTestSourceFileName; \
 		using Super::GetTestSourceFileLine; \
@@ -535,10 +539,10 @@ struct TUESTInstantiator
 	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
 	    : public BOOST_PP_CAT(F, ClassName)
 
-#define TEST_CLASS_WITH_BASE(BaseClass, bIsComplex, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
+#define TEST_CLASS_WITH_BASE(BaseClass, bIsComplex, Flags, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
 
-#define TEST_WITH_BASE(BaseClass, ...) \
-	TEST_CLASS_WITH_BASE(BaseClass, false, __VA_ARGS__) \
+#define TEST_WITH_BASE(BaseClass, Flags, ...) \
+	TEST_CLASS_WITH_BASE(BaseClass, false, Flags, __VA_ARGS__) \
 	{ \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
@@ -561,7 +565,9 @@ struct TUESTInstantiator
  *     ASSERT_THAT(...);
  * }
  */
-#define TEST(...) TEST_WITH_BASE(FUESTTestBase, __VA_ARGS__)
+#define TEST(...) TEST_WITH_BASE(FUESTTestBase, EAutomationTestFlags::None, __VA_ARGS__)
+
+#define TEST_DISABLED(...) TEST_WITH_BASE(FUESTTestBase, EAutomationTestFlags::Disabled, __VA_ARGS__)
 
 /**
  * Declares a test class
@@ -584,7 +590,8 @@ struct TUESTInstantiator
  *     // You can put helper fields or methods here
  * }
  */
-#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, true, __VA_ARGS__)
+#define TEST_CLASS(...) TEST_CLASS_WITH_BASE(FUESTTestBase, true, EAutomationTestFlags::None, __VA_ARGS__)
+#define TEST_CLASS_DISABLED(...) TEST_CLASS_WITH_BASE(FUESTTestBase, true, EAutomationTestFlags::Disabled, __VA_ARGS__)
 
 #define TEST_METHOD(MethodName) \
 	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName), TEXT(__FILE__), __LINE__}}; \

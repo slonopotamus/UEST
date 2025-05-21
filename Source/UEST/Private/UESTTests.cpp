@@ -49,6 +49,11 @@ TEST(UEST, Test, With, Deep, Naming)
 	ASSERT_THAT(true, Is::True);
 }
 
+TEST_DISABLED(UEST, Test, Disabled)
+{
+	ASSERT_THAT(true, Is::False);
+}
+
 // clang-format off
 TEST_CLASS(UEST, SimpleTestClass)
 {
@@ -101,6 +106,14 @@ TEST_CLASS(UEST, BeforeAfter)
 	{
 		ASSERT_THAT(BeforeCalled, Is::EqualTo<int>(2));
 		ASSERT_THAT(AfterCalled, Is::EqualTo<int>(1));
+	}
+};
+
+TEST_CLASS_DISABLED(UEST, TestClass, Disabled)
+{
+	TEST_METHOD(This_Will_Not_Run)
+	{
+		ASSERT_THAT(true, Is::False);
 	}
 };
 // clang-format on

@@ -119,6 +119,31 @@ ASSERT_THAT(Value, Is::Not::Null);
 
 #TODO: Document how to write custom matchers#
 
+== Disabling tests
+
+You can disable individual tests:
+
+[source,cpp]
+----
+TEST_DISABLED(MyFancyTest)
+{
+    ASSERT_THAT(true, Is::False);
+}
+----
+
+You can also disable a whole test class:
+
+[source,cpp]
+----
+TEST_CLASS_DISABLED(MyFancyTestClass)
+{
+    TEST_METHOD(This_Will_Not_Run)
+    {
+        ASSERT_THAT(true, Is::False);
+    }
+}
+----
+
 == Running tests
 
 UEST is seamlessly integrated into Unreal Engine testing infrastructure, so you can run them using standard Session Frontend or IDE integration plugins.
@@ -178,7 +203,6 @@ TEST(MyGame, SimpleMultiplayerTest)
 
 * More matchers
 * Add `ASSERT_MULTIPLE` that allows performing multiple assertions without interrupting execution between them, also known as "soft assertions".
-* Add API to disable tests (with `EAutomationTestFlags::Disabled` under the hood)
 * Add API for asynchronous/latent tests
 
 == Analysis of existing Unreal Engine solutions
