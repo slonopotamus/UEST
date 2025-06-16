@@ -5,7 +5,9 @@
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
 #include "Net/OnlineEngineInterface.h"
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
 #include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
+#endif
 #include "UESTGameInstance.h"
 
 struct FGWorldGuard final : FNoncopyable
@@ -106,7 +108,7 @@ FScopedGameInstance::~FScopedGameInstance()
 	}
 }
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3)
 struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScope
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
