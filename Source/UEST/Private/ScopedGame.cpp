@@ -1,12 +1,11 @@
 #include "ScopedGame.h"
-
 #include "Engine/PackageMapClient.h"
 #include "EngineUtils.h"
 #include "GameMapsSettings.h"
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
-#include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
 #include "Net/OnlineEngineInterface.h"
+#include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
 #include "UESTGameInstance.h"
 
 struct FGWorldGuard final : FNoncopyable
@@ -195,8 +194,7 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FStri
 		const auto BrowseResult = Game->GetEngine()->Browse(*WorldContext, URL, Error);
 		if (BrowseResult == EBrowseReturnVal::Pending)
 		{
-			const auto WaitForConnect = [&]
-			{
+			const auto WaitForConnect = [&] {
 				if (Game->GetWorldContext()->PendingNetGame)
 				{
 					return false;

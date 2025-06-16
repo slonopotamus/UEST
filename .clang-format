@@ -17,7 +17,24 @@ BreakConstructorInitializersBeforeComma:        true
 RemoveSemicolon: true
 InsertBraces: true
 InsertNewlineAtEOF: true
-BreakBeforeBraces:                              Allman
+
+# We have to to set BeforeLambdaBody = false, because in other case it makes incorrect indention
+BreakBeforeBraces:                              Custom
+
+BraceWrapping:
+  AfterEnum:                                    true
+  AfterStruct:                                  true
+  AfterCaseLabel:                               true
+  AfterClass:                                   true
+  AfterControlStatement:                        Always
+  AfterFunction:                                true
+  AfterNamespace:                               true
+  AfterUnion:                                   true
+  AfterExternBlock:                             true
+  BeforeElse:                                   true
+  BeforeCatch:                                  true
+  SplitEmptyFunction:                           false
+  IndentBraces:                                 false
 
 AllowShortLambdasOnASingleLine:                 Inline
 ColumnLimit:                                    0
@@ -26,7 +43,7 @@ SpaceAfterTemplateKeyword:                      false
 SpacesInAngles:                                 false
 ContinuationIndentWidth:                        4
 IndentCaseLabels:                               true
-IncludeBlocks:                                  Regroup
+IncludeBlocks:                                  Merge
 IncludeCategories:
   - Regex:    '.*\.generated\.h'
     Priority: 2

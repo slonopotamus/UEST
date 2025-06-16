@@ -1,5 +1,4 @@
 #include "UEST.h"
-
 #include "Modules/ModuleManager.h"
 
 FUESTTestBase::FUESTTestBase(const FString& InName, bool bIsComplex)
