@@ -5,7 +5,7 @@
 #include "GameMapsSettings.h"
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
-#include "Misc/PlayInEditorLoadingScope.h"
+#include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
 #include "Net/OnlineEngineInterface.h"
 #include "UESTGameInstance.h"
 
@@ -26,11 +26,11 @@ struct FGWorldGuard final : FNoncopyable
 
 struct FCVarGuard final : FNoncopyable
 {
-	explicit FCVarGuard(IConsoleVariable* Variable, const FScopedGameInstance::FCVarConfig& CVarConfig)
-	    : Variable{Variable}
+	explicit FCVarGuard(const FString& CVarName, const FScopedGameInstance::FCVarConfig& CVarConfig)
+	    : Variable{IConsoleManager::Get().FindConsoleVariable(*CVarName)}
 	    , OldValue{Variable ? Variable->GetString() : TEXT("")}
 	{
-		if (Variable || (CVarConfig.bEnsureIfVariableNotFound && ensureAlways(Variable)))
+		if (Variable || (CVarConfig.bReportNonexistentVariable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *CVarName)))
 		{
 			Variable->Set(*CVarConfig.Value);
 		}
@@ -68,9 +68,9 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 	{
 		CVarsGuard = MakeUnique<FCVarsGuard>();
 
-		for (const auto& CVar : CVars)
+		for (const auto& [CVarName, CVarConfig] : CVars)
 		{
-			CVarsGuard->ConsoleVariableGuards.Emplace(IConsoleManager::Get().FindConsoleVariable(*CVar.Key), CVar.Value);
+			CVarsGuard->ConsoleVariableGuards.Emplace(CVarName, CVarConfig);
 		}
 	}
 

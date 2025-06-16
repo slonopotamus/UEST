@@ -29,7 +29,7 @@ public:
 	struct FCVarConfig
 	{
 		FString Value;
-		bool bEnsureIfVariableNotFound;
+		bool bReportNonexistentVariable = true;
 	};
 
 	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars);
@@ -73,9 +73,9 @@ public:
 		return *this;
 	}
 
-	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bEnsureIfVariableNotFound = true)
+	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bReportNonexistentVariable = true)
 	{
-		CVars.Add(MoveTemp(Name), {MoveTemp(Value), bEnsureIfVariableNotFound});
+		CVars.Add(MoveTemp(Name), {MoveTemp(Value), bReportNonexistentVariable});
 		return *this;
 	}
 
