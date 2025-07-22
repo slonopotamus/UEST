@@ -59,8 +59,8 @@ namespace UEST
 		struct True final
 		{
 			template<typename T>
-			    requires requires(const T t) { { static_cast<bool>(t) }; }
-			bool Matches(const T& Value) const
+			    requires(UE::same_as<std::decay_t<T>, bool>)
+			bool Matches(const bool& Value) const
 			{
 				return Value;
 			}
@@ -74,8 +74,8 @@ namespace UEST
 		struct False final
 		{
 			template<typename T>
-			    requires requires(const T t) { { static_cast<bool>(t) }; }
-			bool Matches(const T& Value) const
+			    requires(UE::same_as<std::decay_t<T>, bool>)
+			bool Matches(const bool& Value) const
 			{
 				return !Value;
 			}
