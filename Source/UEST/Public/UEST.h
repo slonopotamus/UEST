@@ -164,19 +164,19 @@ namespace UEST
 			{
 			}
 
-			template<typename P>
+			template<typename>
 			bool Matches(const FVector& Value) const
 			{
 				return Value.Equals(Expected, Tolerance);
 			}
 
-			template<typename P>
+			template<typename>
 			bool Matches(const float& Value) const
 			{
 				return FMath::IsNearlyEqual(Value, Expected, Tolerance);
 			}
 
-			template<typename P>
+			template<typename>
 			bool Matches(const double& Value) const
 			{
 				return FMath::IsNearlyEqual(Value, Expected, Tolerance);
