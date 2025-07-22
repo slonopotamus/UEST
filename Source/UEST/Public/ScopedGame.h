@@ -75,7 +75,7 @@ public:
 
 	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bReportNonexistentVariable = true)
 	{
-		CVars.Add(MoveTemp(Name), {MoveTemp(Value), bReportNonexistentVariable});
+		CVars.Emplace(MoveTemp(Name), {MoveTemp(Value), bReportNonexistentVariable});
 		return *this;
 	}
 
