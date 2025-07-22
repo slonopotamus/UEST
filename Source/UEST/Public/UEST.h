@@ -461,7 +461,7 @@ namespace Is
 	{ \
 		const auto& _M = Matcher; \
 		const auto& _V = Value; \
-		if (!ensureAlwaysMsgf(_M.template Matches<TRemoveReference<decltype(_V)>::Type>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
+		if (!ensureAlwaysMsgf(_M.template Matches<std::decay_t<decltype(_V)>>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
 		{ \
 			return; \
 		} \
