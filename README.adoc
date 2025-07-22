@@ -92,6 +92,9 @@ Failed assertion performs `return`, aborting further test execution.
 `ASSERT_THAT(Value, Is::False)`:: Tests that `Value` is `false`.
 `ASSERT_THAT(Value, Is::Null)`:: Tests that `Value` is `nullptr`.
 `ASSERT_THAT(Value, Is::EqualTo(Expected))`:: Tests that `Value` is equal to `Expected`.
+`ASSERT_THAT(Value, Is::NearlyEqualTo(Expected, Tolerance))`:: Tests that `Value` is nearly equal to `Expected` with `Tolerance`.
+Use this for `double` and `float` values.
+Default tolerance is `UE_SMALL_NUMBER`.
 `ASSERT_THAT(Value, Is::LessThan(OtherValue))`:: Tests that `Value` is less than `OtherValue`.
 `ASSERT_THAT(Value, Is::LessThanOrEqualTo(OtherValue))` or `ASSERT_THAT(Value, Is::AtMost(OtherValue)`:: Tests that `Value` is less than or equal to `OtherValue`.
 `ASSERT_THAT(Value, Is::GreaterThan(OtherValue))`:: Tests that `Value` is greater than `OtherValue`.

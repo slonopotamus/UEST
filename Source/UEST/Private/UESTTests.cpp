@@ -21,8 +21,13 @@ TEST(UEST, SimpleTest)
 	// TODO: Need explicit <int> for now because of clang bug: https://github.com/llvm/llvm-project/issues/73093
 	ASSERT_THAT(42, Is::EqualTo<int>(42));
 	ASSERT_THAT(42, Is::Not::EqualTo<int>(43));
+
+	ASSERT_THAT(1.0, Is::NearlyEqualTo<double>(1.1, 0.2));
+	ASSERT_THAT(1.0, Is::Not::NearlyEqualTo<double>(1.1, 0.05));
+	
 	ASSERT_THAT(42, Is::LessThan<int>(43));
 	ASSERT_THAT(42, Is::Not::LessThan<int>(41));
+
 	ASSERT_THAT(42, Is::GreaterThan<int>(41));
 	ASSERT_THAT(42, Is::Not::GreaterThan<int>(43));
 

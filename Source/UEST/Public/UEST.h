@@ -152,6 +152,38 @@ namespace UEST
 		};
 
 		template<typename P>
+		// TODO: Require that P is either double or float
+		struct NearlyEqualTo final : FNoncopyable
+		{
+			const P Expected;
+			const P Tolerance;
+
+			// 
+			explicit NearlyEqualTo(P Expected, P Tolerance = UE_SMALL_NUMBER)
+			    : Expected{Expected}
+				, Tolerance{Tolerance}
+			{
+			}
+
+			template<typename T>
+				// TODO: Require that T is either double or float
+			    requires requires(const T t, const P p) {
+				    {
+					    t - p
+				    };
+			    }
+			bool Matches(const T& Value) const
+			{
+				return FMath::IsNearlyEqual(Value, Expected, Tolerance);
+			}
+
+			FString Describe() const
+			{
+				return FString::Printf(TEXT("be nearly equal to %s with tolerance %s"), *ToString(Expected), *ToString(Tolerance));
+			}
+		};
+
+		template<typename P>
 		struct LessThan final : FNoncopyable
 		{
 			const P Expected;
@@ -353,6 +385,9 @@ namespace Is
 	using EqualTo = UEST::Matchers::EqualTo<T>;
 
 	template<typename T>
+	using NearlyEqualTo = UEST::Matchers::NearlyEqualTo<T>;
+
+	template<typename T>
 	using LessThan = UEST::Matchers::LessThan<T>;
 
 	template<typename T>
@@ -388,6 +423,9 @@ namespace Is
 
 		template<typename T>
 		using EqualTo = UEST::Matchers::Not<UEST::Matchers::EqualTo<T>, T>;
+
+		template<typename T>
+		using NearlyEqualTo = UEST::Matchers::Not<UEST::Matchers::NearlyEqualTo<T>, T, T>;
 
 		template<typename T>
 		using LessThan = UEST::Matchers::GreaterThanOrEqualTo<T>;
