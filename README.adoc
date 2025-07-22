@@ -19,7 +19,7 @@ This project aims to provide a testing framework for Unreal Engine that does not
 == Dependencies
 
 This project relies on C++20 features.
-Tested against Unreal Engine 5.4.
+Tested against Unreal Engine 5.5.
 
 == Usage
 
