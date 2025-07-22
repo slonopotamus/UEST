@@ -24,7 +24,7 @@ TEST(UEST, SimpleTest)
 
 	ASSERT_THAT(1.0, Is::NearlyEqualTo<double>(1.1, 0.2));
 	ASSERT_THAT(1.0, Is::Not::NearlyEqualTo<double>(1.1, 0.05));
-	
+
 	ASSERT_THAT(42, Is::LessThan<int>(43));
 	ASSERT_THAT(42, Is::Not::LessThan<int>(41));
 

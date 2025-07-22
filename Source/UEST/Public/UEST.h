@@ -158,15 +158,14 @@ namespace UEST
 			const P Expected;
 			const P Tolerance;
 
-			// 
 			explicit NearlyEqualTo(P Expected, P Tolerance = UE_SMALL_NUMBER)
 			    : Expected{Expected}
-				, Tolerance{Tolerance}
+			    , Tolerance{Tolerance}
 			{
 			}
 
 			template<typename T>
-				// TODO: Require that T is either double or float
+			// TODO: Require that T is either double or float
 			    requires requires(const T t, const P p) {
 				    {
 					    t - p
