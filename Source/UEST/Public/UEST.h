@@ -8,11 +8,8 @@
 #include "Misc/AutomationTest.h"
 
 // TODO: Get rid of Boost
-#include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/comparison/greater.hpp>
-#include <boost/preprocessor/seq/elem.hpp>
 #include <boost/preprocessor/seq/fold_left.hpp>
-#include <boost/preprocessor/stringize.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
 
 namespace UEST
@@ -524,12 +521,12 @@ struct TUESTInstantiator
 #define UEST_CONCAT_SEQ_N(seq, fold_op, elem_op) BOOST_PP_SEQ_FOLD_LEFT(fold_op, elem_op(BOOST_PP_SEQ_HEAD(seq)), BOOST_PP_SEQ_TAIL(seq))
 #define UEST_CONCAT_SEQ(seq, fold_op, elem_op) BOOST_PP_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(seq), 1), UEST_CONCAT_SEQ_N, UEST_CONCAT_SEQ_1)(seq, fold_op, elem_op)
 
-#define UEST_PRETTY_NAME_ELEM_OP(x) BOOST_PP_STRINGIZE(x)
+#define UEST_PRETTY_NAME_ELEM_OP(x) UE_STRINGIZE(x)
 #define UEST_PRETTY_NAME_FOLD_OP(s, state, x) state "." UEST_PRETTY_NAME_ELEM_OP(x)
 #define UEST_PRETTY_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_PRETTY_NAME_FOLD_OP, UEST_PRETTY_NAME_ELEM_OP)
 
 #define UEST_CLASS_NAME_ELEM_OP(x) x
-#define UEST_CLASS_NAME_FOLD_OP(s, state, x) BOOST_PP_CAT(state, BOOST_PP_CAT(_, x))
+#define UEST_CLASS_NAME_FOLD_OP(s, state, x) UE_JOIN(state, UE_JOIN(_, x))
 #define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_FOLD_OP, UEST_CLASS_NAME_ELEM_OP)
 
 #if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
@@ -539,13 +536,13 @@ struct TUESTInstantiator
 #endif
 
 #define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, ClassName, PrettyName) \
-	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)); \
-	struct BOOST_PP_CAT(F, ClassName) \
+	struct UE_JOIN(F, UE_JOIN(ClassName, Impl)); \
+	struct UE_JOIN(F, ClassName) \
 	    : public BaseClass \
 	{ \
-		typedef BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) ThisClass; \
+		typedef UE_JOIN(F, UE_JOIN(ClassName, Impl)) ThisClass; \
 		typedef BaseClass Super; \
-		BOOST_PP_CAT(F, ClassName) \
+		UE_JOIN(F, ClassName) \
 		() \
 		    : Super(TEXT(PrettyName), bIsComplex) \
 		{ \
@@ -573,13 +570,13 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
-	void BOOST_PP_CAT(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const \
+	void UE_JOIN(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const \
 	{ \
 		Super::GetTests(OutBeautifiedNames, OutTestCommands); \
 	} \
-	static const TUESTInstantiator<BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl))> BOOST_PP_CAT(ClassName, Instantiator); \
-	struct BOOST_PP_CAT(F, BOOST_PP_CAT(ClassName, Impl)) \
-	    : public BOOST_PP_CAT(F, ClassName)
+	static const TUESTInstantiator<UE_JOIN(F, UE_JOIN(ClassName, Impl))> UE_JOIN(ClassName, Instantiator); \
+	struct UE_JOIN(F, UE_JOIN(ClassName, Impl)) \
+	    : public UE_JOIN(F, ClassName)
 
 #define TEST_CLASS_WITH_BASE(BaseClass, bIsComplex, Flags, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
 
@@ -595,7 +592,7 @@ struct TUESTInstantiator
 		/* clang-format off */ \
 	}; \
 	/* clang-format on */ \
-	void BOOST_PP_CAT(BOOST_PP_CAT(F, UEST_CLASS_NAME(__VA_ARGS__)), Impl)::DoTest(const FString& Parameters)
+	void UE_JOIN(UE_JOIN(F, UEST_CLASS_NAME(__VA_ARGS__)), Impl)::DoTest(const FString& Parameters)
 
 /**
  * Simple macro for a test.
