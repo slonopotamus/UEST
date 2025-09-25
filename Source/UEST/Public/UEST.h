@@ -453,10 +453,10 @@ namespace Is
 } // namespace Is
 
 // TODO: Provide ASSERT_THAT(Value) variant that tests that Value is true
-#define ASSERT_THAT(Value, Matcher) \
+#define ASSERT_THAT(Value, ...) \
 	do \
 	{ \
-		const auto& _M = Matcher; \
+		const auto& _M = __VA_ARGS__; \
 		const auto& _V = Value; \
 		if (!ensureAlwaysMsgf(_M.template Matches<std::decay_t<decltype(_V)>>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
 		{ \

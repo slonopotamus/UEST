@@ -22,11 +22,11 @@ TEST(UEST, SimpleTest)
 	ASSERT_THAT(42, Is::EqualTo<int>(42));
 	ASSERT_THAT(42, Is::Not::EqualTo<int>(43));
 
-	ASSERT_THAT(1.0, (Is::NearlyEqualTo<double, double>(1.1, 0.2)));
-	ASSERT_THAT(1.0, (Is::Not::NearlyEqualTo<double, double>(1.1, 0.05)));
+	ASSERT_THAT(1.0, Is::NearlyEqualTo<double, double>(1.1, 0.2));
+	ASSERT_THAT(1.0, Is::Not::NearlyEqualTo<double, double>(1.1, 0.05));
 
-	ASSERT_THAT(FVector::ZeroVector, (Is::NearlyEqualTo<FVector, double>(FVector::OneVector, 1.)));
-	ASSERT_THAT(FVector::ZeroVector, (Is::Not::NearlyEqualTo<FVector, double>(FVector::OneVector, 0.5)));
+	ASSERT_THAT(FVector::ZeroVector, Is::NearlyEqualTo<FVector, double>(FVector::OneVector, 1.));
+	ASSERT_THAT(FVector::ZeroVector, Is::Not::NearlyEqualTo<FVector, double>(FVector::OneVector, 0.5));
 
 	ASSERT_THAT(42, Is::LessThan<int>(43));
 	ASSERT_THAT(42, Is::Not::LessThan<int>(41));
