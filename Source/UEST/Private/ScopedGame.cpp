@@ -9,6 +9,7 @@
 #include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
 #endif
 #include "UESTGameInstance.h"
+#include "UESTHelpers.h"
 
 struct FGWorldGuard final : FNoncopyable
 {
@@ -196,54 +197,58 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FStri
 		const auto BrowseResult = Game->GetEngine()->Browse(*WorldContext, URL, Error);
 		if (BrowseResult == EBrowseReturnVal::Pending)
 		{
-			const auto WaitForConnect = [&] {
-				if (Game->GetWorldContext()->PendingNetGame)
-				{
-					return false;
-				}
-
-				const auto* ClientWorld = Game->GetWorld();
-
-				const auto* NetDriver = ClientWorld->GetNetDriver();
-				if (!NetDriver)
-				{
-					return false;
-				}
-
-				if (!NetDriver->ServerConnection)
-				{
-					return false;
-				}
-
-				if (NetDriver->ServerConnection->URL != URL)
-				{
-					return false;
-				}
-
-				if (!ClientWorld->GetGameState())
-				{
-					return false;
-				}
-
-				const auto* ClientPC = ClientWorld->GetFirstPlayerController();
-				if (!ClientPC)
-				{
-					return false;
-				}
-
-				if (!ClientPC->PlayerState)
-				{
-					return false;
-				}
-
-				return true;
-			};
-
-			if (bWaitForConnect && !TickUntil(WaitForConnect))
+			if (bWaitForConnect)
 			{
-				ensureAlwaysMsgf(false, TEXT("Timeout connecting to dedicated server"));
-				DestroyGame(Game);
-				return nullptr;
+				const auto CheckConnection = [&] {
+					if (Game->GetWorldContext()->PendingNetGame)
+					{
+						return EScopedGameConnectError::PendingNetGame;
+					}
+
+					const auto* ClientWorld = Game->GetWorld();
+
+					const auto* NetDriver = ClientWorld->GetNetDriver();
+					if (!NetDriver)
+					{
+						return EScopedGameConnectError::NoNetDriver;
+					}
+
+					if (!NetDriver->ServerConnection)
+					{
+						return EScopedGameConnectError::NoServerConnection;
+					}
+
+					if (NetDriver->ServerConnection->URL != URL)
+					{
+						return EScopedGameConnectError::WrongURL;
+					}
+
+					if (!ClientWorld->GetGameState())
+					{
+						return EScopedGameConnectError::NoGameState;
+					}
+
+					const auto* ClientPC = ClientWorld->GetFirstPlayerController();
+					if (!ClientPC)
+					{
+						return EScopedGameConnectError::NoClientPC;
+					}
+
+					if (!ClientPC->PlayerState)
+					{
+						return EScopedGameConnectError::NoClientPS;
+					}
+
+					return EScopedGameConnectError::Success;
+				};
+
+				EScopedGameConnectError ConnectError = EScopedGameConnectError::Success;
+				if (!TickUntil([&] { ConnectError = CheckConnection(); return ConnectError == EScopedGameConnectError::Success; }))
+				{
+					ensureAlwaysMsgf(false, TEXT("Timeout connecting to dedicated server: %s"), *ToString(ConnectError));
+					DestroyGame(Game);
+					return nullptr;
+				}
 			}
 		}
 		else if (!ensureAlways(BrowseResult == EBrowseReturnVal::Success))

@@ -9,6 +9,19 @@ enum class EScopedGameType : uint8
 	Empty,
 };
 
+UENUM()
+enum class EScopedGameConnectError : uint8
+{
+	Success,
+	PendingNetGame,
+	NoNetDriver,
+	NoServerConnection,
+	WrongURL,
+	NoGameState,
+	NoClientPC,
+	NoClientPS,
+};
+
 class UEST_API FScopedGameInstance : FNoncopyable
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
