@@ -1,5 +1,6 @@
 #include "ScopedGame.h"
 #include "UEST.h"
+#include "UESTHelpers.h"
 
 TEST(UEST, ScopedGame, Simple)
 {

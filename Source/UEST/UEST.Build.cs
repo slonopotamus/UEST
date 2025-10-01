@@ -14,13 +14,5 @@ public class UEST : ModuleRules
 			"IrisCore",
 			"TypedElementFramework",
 		});
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(new[]
-			{
-				"CQTest",
-			});
-		}
 	}
 }

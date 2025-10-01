@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#if WITH_UNREAL_DEVELOPER_TOOLS
-#include "Assert/CQTestConvert.h"
-#endif
-
 #include "Elements/Common/TypedElementCommonTypes.h"
 #include "Misc/AutomationTest.h"
 
@@ -14,16 +10,6 @@
 
 namespace UEST
 {
-	template<typename T>
-	static FString ToString(const T& Value)
-	{
-#if WITH_UNREAL_DEVELOPER_TOOLS
-		return CQTestConvert::ToString(Value);
-#else
-		return TEXT("UNKNOWN");
-#endif
-	}
-
 	template<typename M, typename... P>
 	concept Matcher = requires(M const m, P... p) {
 		{
@@ -330,7 +316,7 @@ namespace UEST
 			    }
 			bool Matches(const T& Value) const
 			{
-				if (!ensureAlwaysMsgf(From <= To, TEXT("Invalid range, %s is greater than %s"), *CQTestConvert::ToString(From), *CQTestConvert::ToString(To)))
+				if (!ensureAlwaysMsgf(From <= To, TEXT("Invalid range, %s is greater than %s"), *ToString(From), *ToString(To)))
 				{
 					return false;
 				}
@@ -458,7 +444,7 @@ namespace Is
 	{ \
 		const auto& _M = __VA_ARGS__; \
 		const auto& _V = Value; \
-		if (!ensureAlwaysMsgf(_M.template Matches<std::decay_t<decltype(_V)>>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *CQTestConvert::ToString(_V), *_M.Describe())) \
+		if (!ensureAlwaysMsgf(_M.template Matches<std::decay_t<decltype(_V)>>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *ToString(_V), *_M.Describe())) \
 		{ \
 			return; \
 		} \

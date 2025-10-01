@@ -1,4 +1,5 @@
-﻿#include "UEST.h"
+﻿#include "UESTHelpers.h"
+#include "UEST.h"
 
 TEST(UEST, SimpleTest)
 {
