@@ -439,6 +439,7 @@ namespace Is
 } // namespace Is
 
 // TODO: Provide ASSERT_THAT(Value) variant that tests that Value is true
+// TODO: Provide ASSERT_THAT(Value, Matcher, MessageFormat, FormatArguments) variant that would print custom error message when assertion fails
 #define ASSERT_THAT(Value, ...) \
 	do \
 	{ \
