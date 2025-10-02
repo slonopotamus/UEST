@@ -1,4 +1,5 @@
 ﻿#include "UESTHelpers.h"
+// UEST.h needs to be after UESTHelpers.h
 #include "UEST.h"
 
 TEST(UEST, SimpleTest)
