@@ -356,6 +356,7 @@ void FScopedGameInstance::TickInternal(const float DeltaSeconds, const ELevelTic
 		const FGWorldGuard GWorldGuard;
 
 		Game->GetEngine()->TickWorldTravel(*Game->GetWorldContext(), DeltaSeconds);
+		Game->GetWorld()->BlockTillLevelStreamingCompleted();
 		Game->GetWorld()->Tick(TickType, DeltaSeconds);
 	}
 }
