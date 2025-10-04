@@ -438,12 +438,14 @@ namespace Is
 	} // namespace Not
 } // namespace Is
 
-// TODO: Provide ASSERT_THAT(Value) variant that tests that Value is true
+#define UEST_MATCHER_HELPER(...) Is::True
+#define UEST_MATCHER_HELPERN(...) __VA_ARGS__
+
 // TODO: Provide ASSERT_THAT(Value, Matcher, MessageFormat, FormatArguments) variant that would print custom error message when assertion fails
 #define ASSERT_THAT(Value, ...) \
 	do \
 	{ \
-		const auto& _M = __VA_ARGS__; \
+		const auto& _M = UEST_MATCHER_HELPER##__VA_OPT__(N)(__VA_ARGS__); \
 		const auto& _V = Value; \
 		if (!ensureAlwaysMsgf(_M.template Matches<std::decay_t<decltype(_V)>>(_V), TEXT("%s: %s must %s"), TEXT(#Value), *ToString(_V), *_M.Describe())) \
 		{ \

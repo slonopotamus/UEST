@@ -89,6 +89,7 @@ Failed assertion performs `return`, aborting further test execution.
 
 .Available matchers
 `ASSERT_THAT(Value, Is::True)`:: Tests that `Value` is `true`.
+You can just use `ASSERT_THAT(Value)` as a shortcut.
 `ASSERT_THAT(Value, Is::False)`:: Tests that `Value` is `false`.
 `ASSERT_THAT(Value, Is::Null)`:: Tests that `Value` is `nullptr`.
 `ASSERT_THAT(Value, Is::EqualTo(Expected))`:: Tests that `Value` is equal to `Expected`.

@@ -4,6 +4,7 @@
 
 TEST(UEST, SimpleTest)
 {
+	ASSERT_THAT(true);
 	ASSERT_THAT(true, Is::True);
 
 	bool t = true;
