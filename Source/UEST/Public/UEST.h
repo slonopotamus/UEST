@@ -326,7 +326,7 @@ namespace UEST
 
 			FString Describe() const
 			{
-				return FString::Printf(TEXT("be in range from %s to %s"), *ToString(From), *ToString(To));
+				return FString::Printf(TEXT("be in range from %s to %s"), *::ToString(From), *::ToString(To));
 			}
 		};
 
