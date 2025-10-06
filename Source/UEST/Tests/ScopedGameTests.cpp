@@ -1,6 +1,8 @@
 #include "ScopedGame.h"
 #include "UESTHelpers.h"
 // UEST.h needs to be after UESTHelpers.h
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameSession.h"
 #include "UEST.h"
 
 TEST(UEST, ScopedGame, Simple)
@@ -18,7 +20,7 @@ TEST(UEST, ScopedGame, Simple)
 
 	// Actually, you can connect as many clients as you want!
 	// Well, almost. Max number of simultaneous game instances is 10, see MAX_PIE_INSTANCES in UE sources.
-	for (int32 Index = 0; Index < 5; ++Index)
+	for (int32 Index = 0; Index < FMath::Min(4, Server->GetWorld()->GetAuthGameMode()->GameSession->MaxPlayers - 1); ++Index)
 	{
 		Tester.CreateClientFor(Server);
 	}
