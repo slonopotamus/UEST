@@ -1,8 +1,8 @@
 #include "ScopedGame.h"
 #include "UESTHelpers.h"
-// UEST.h needs to be after UESTHelpers.h
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
+// UEST.h needs to be after UESTHelpers.h
 #include "UEST.h"
 
 TEST(UEST, ScopedGame, Simple)
