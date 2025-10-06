@@ -1,7 +1,7 @@
-#include "ScopedGame.h"
-#include "UESTHelpers.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
+#include "ScopedGame.h"
+#include "UESTHelpers.h"
 // UEST.h needs to be after UESTHelpers.h
 #include "UEST.h"
 
