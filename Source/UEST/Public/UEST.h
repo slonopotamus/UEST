@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Elements/Common/TypedElementCommonTypes.h"
 #include "Misc/AutomationTest.h"
@@ -27,7 +27,11 @@ namespace UEST
 		struct Null final
 		{
 			template<typename T>
-			    requires std::is_pointer_v<T> || std::is_null_pointer_v<T>
+			    requires requires(const T t) {
+				    {
+					    t == nullptr
+				    };
+			    }
 			bool Matches(const T& Value) const
 			{
 				return Value == nullptr;
