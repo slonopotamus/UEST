@@ -49,6 +49,8 @@ class UEST_API FScopedGameInstance : FNoncopyable
 	[[nodiscard]] static UObject* StaticFindReplicatedObjectIn(UObject* Object, const UWorld* World);
 
 	static void CollectGarbage();
+	
+	static int32 FindFreePIEInstance();
 
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;

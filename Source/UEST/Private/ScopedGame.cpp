@@ -53,9 +53,6 @@ private:
 
 static int32 NumScopedGames = 0;
 
-// We are limited by MAX_PIE_INSTANCES :(
-static TArray<int32> FreePIEInstances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-
 struct FCVarsGuard final : FNoncopyable
 {
 	TArray<FCVarGuard> ConsoleVariableGuards;
@@ -154,9 +151,28 @@ struct FGPlayInEditorIDGuard final : TGuardValue<decltype(GPlayInEditorID), int3
 };
 #endif
 
-UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FString MapToLoad, const bool bWaitForConnect)
+int32 FScopedGameInstance::FindFreePIEInstance()
 {
-	if (!ensureAlwaysMsgf(!FreePIEInstances.IsEmpty(), TEXT("Attempt to create too many games at the same time!")))
+	TSet<int32> UsedPIEIndices;
+	for (const auto& WorldContext : GEngine->GetWorldContexts())
+	{
+		UsedPIEIndices.Add(WorldContext.PIEInstance);
+	}
+
+	int32 Result = 0;
+	
+	while (UsedPIEIndices.Contains(Result))
+	{
+		++Result;
+	}
+	
+	return Result;
+}
+
+UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FString MapToLoad, const bool bWaitForConnect)
+{	
+	const auto PIEInstance = FindFreePIEInstance();
+	if (!ensureAlwaysMsgf(PIEInstance < 10, TEXT("Attempt to create too many games at the same time! See MAX_PIE_INSTANCES in Unreal Engine")))
 	{
 		return nullptr;
 	}
@@ -173,8 +189,6 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FStri
 	}
 
 	Games.Emplace(Game);
-
-	int32 PIEInstance = FreePIEInstances.Pop();
 
 	const auto bRunAsDedicated = Type == EScopedGameType::Server;
 	if (auto* TestableGame = Cast<IUESTGameInstance>(Game))
@@ -300,11 +314,6 @@ UGameInstance* FScopedGameInstance::CreateClientFor(const UGameInstance* Server,
 
 void FScopedGameInstance::DestroyGameInternal(UGameInstance& Game)
 {
-	if (const auto* WorldContext = Game.GetWorldContext())
-	{
-		FreePIEInstances.Push(WorldContext->PIEInstance);
-	}
-
 	const auto OnlineSubsystemId = UOnlineEngineInterface::Get()->GetOnlineIdentifier(*Game.GetWorldContext());
 	const auto World = Game.GetWorld();
 
