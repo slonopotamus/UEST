@@ -4,8 +4,22 @@
 
 enum class EScopedGameType : uint8
 {
+	/**
+	 * Server game type represents a dedicated server.
+	 * It accepts incoming network connections, has no local players and its NetMode is NM_DedicatedServer.
+	 */
 	Server,
+
+	/**
+	 * Client game type represents a game client.
+	 * It initially has one local player (though games can add more) and a GameViewportClient.
+	 * Its NetMode can be: NM_Standalone, NM_ListenServer, NM_Client.
+	 */
 	Client,
+
+	/**
+	 * Empty game type is possibly a not very useful type of game that neither listens to network nor has local players.
+	 */
 	Empty,
 };
 
@@ -32,7 +46,7 @@ class UEST_API FScopedGameInstance : FNoncopyable
 
 	void TickInternal(float DeltaSeconds, const ELevelTick TickType);
 
-	static UObject* StaticFindReplicatedObjectIn(UObject* Object, const UWorld* World);
+	[[nodiscard]] static UObject* StaticFindReplicatedObjectIn(UObject* Object, const UWorld* World);
 
 	static void CollectGarbage();
 
@@ -45,27 +59,27 @@ public:
 		bool bReportNonexistentVariable = true;
 	};
 
-	explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars);
+	[[nodiscard]] explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars);
 
-	FScopedGameInstance(FScopedGameInstance&& Other);
+	[[nodiscard]] FScopedGameInstance(FScopedGameInstance&& Other);
 
 	virtual ~FScopedGameInstance();
 
-	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, FString MapToLoad = TEXT(""), bool bWaitForConnect = true);
+	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, FString MapToLoad = TEXT(""), bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
-	UGameInstance* CreateClientFor(const UGameInstance* Server, const bool bWaitForConnect = true);
+	UGameInstance* CreateClientFor(const UGameInstance* Server, const bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
 	bool DestroyGame(UGameInstance* Game);
 
-	/** Advances time in all created games by DeltaSeconds in Step increments */
+	/** Advances time in all created games by DeltaSeconds in StepSeconds increments */
 	void Tick(float DeltaSeconds, float StepSeconds = DefaultStepSeconds, ELevelTick TickType = LEVELTICK_All);
 
 	/** Advances time in all created games in StepSeconds increments until Condition returns true */
-	bool TickUntil(const TFunction<bool()>& Condition, float StepSeconds = DefaultStepSeconds, float MaxWaitTime = 10.f, ELevelTick TickType = LEVELTICK_All);
+	[[nodiscard]] bool TickUntil(const TFunctionRef<bool()>& Condition, float StepSeconds = DefaultStepSeconds, float MaxWaitTime = 10.f, ELevelTick TickType = LEVELTICK_All);
 
 	template<class T = UObject>
 	    requires std::is_convertible_v<T*, const UObject*>
-	T* FindReplicatedObjectIn(T* Object, const UWorld* World)
+	[[nodiscard]] T* FindReplicatedObjectIn(T* Object, const UWorld* World) UE_LIFETIMEBOUND
 	{
 		auto* Result = StaticFindReplicatedObjectIn(Object, World);
 		return Cast<T>(Result);
@@ -78,19 +92,23 @@ class UEST_API FScopedGame
 	TMap<FString, FScopedGameInstance::FCVarConfig> CVars;
 
 public:
-	FScopedGame();
+	[[nodiscard]] FScopedGame();
 
-	FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass)
+	[[nodiscard]] FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass) UE_LIFETIMEBOUND
 	{
-		GameInstanceClass = MoveTemp(InGameInstanceClass);
+		if (ensure(InGameInstanceClass))
+		{
+			GameInstanceClass = MoveTemp(InGameInstanceClass);
+		}
+
 		return *this;
 	}
 
-	FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bReportNonexistentVariable = true)
+	[[nodiscard]] FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bReportNonexistentVariable = true) UE_LIFETIMEBOUND
 	{
 		CVars.Emplace(MoveTemp(Name), {MoveTemp(Value), bReportNonexistentVariable});
 		return *this;
 	}
 
-	FScopedGameInstance Create() const;
+	[[nodiscard]] FScopedGameInstance Create() const;
 };

@@ -493,7 +493,7 @@ void FScopedGameInstance::Tick(const float DeltaSeconds, const float StepSeconds
 	}
 }
 
-bool FScopedGameInstance::TickUntil(const TFunction<bool()>& Condition, const float StepSeconds, const float MaxWaitTime, ELevelTick TickType)
+bool FScopedGameInstance::TickUntil(const TFunctionRef<bool()>& Condition, const float StepSeconds, const float MaxWaitTime, ELevelTick TickType)
 {
 	if (!ensureMsgf(StepSeconds > 0, TEXT("Tick step must be positive: %f"), StepSeconds))
 	{
@@ -528,7 +528,7 @@ FScopedGame::FScopedGame()
 
 	// Client runs DNS lookup in a separate thread without any way to wait for it (except sleeping real time)
 	// So just disable it for now because we know that we connect via IP address
-	WithConsoleVariable(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
+	(void)WithConsoleVariable(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
 
 	(void)WithConsoleVariable(TEXT("net.DisableBandwithThrottling"), TEXT("1"));
 	(void)WithConsoleVariable(TEXT("net.DisableRandomNetUpdateDelay"), TEXT("1"));
