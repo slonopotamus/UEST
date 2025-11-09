@@ -51,17 +51,41 @@ private:
 	const FString OldValue;
 };
 
-struct FCVarsGuard final : FNoncopyable
-{
-	TArray<FCVarGuard> ConsoleVariableGuards;
-};
-
 static int32 NumScopedGames = 0;
 
 // We are limited by MAX_PIE_INSTANCES :(
 static TArray<int32> FreePIEInstances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
+struct FCVarsGuard final : FNoncopyable
+{
+	TArray<FCVarGuard> ConsoleVariableGuards;
+};
+
 static TUniquePtr<FCVarsGuard> CVarsGuard;
+
+struct FNetDriverTickRateAdjuster final : FNoncopyable
+{
+	[[nodiscard]] FNetDriverTickRateAdjuster()
+	{
+		Handle = FWorldDelegates::OnNetDriverCreated.AddRaw(this, &FNetDriverTickRateAdjuster::OnNetDriverCreated);
+	}
+
+	~FNetDriverTickRateAdjuster()
+	{
+		FWorldDelegates::OnNetDriverCreated.Remove(Handle);
+	}
+
+private:
+	FDelegateHandle Handle;
+
+	void OnNetDriverCreated(UWorld* InWorld, UNetDriver* InNetDriver)
+	{
+		// Make sure NetDriver will tick every engine frame
+		InNetDriver->MaxNetTickRate = 0;
+	}
+};
+
+static TUniquePtr<FNetDriverTickRateAdjuster> NetDriverTickRateAdjuster;
 
 FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
@@ -74,6 +98,8 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 		{
 			CVarsGuard->ConsoleVariableGuards.Emplace(CVarName, CVarConfig);
 		}
+
+		NetDriverTickRateAdjuster = MakeUnique<FNetDriverTickRateAdjuster>();
 	}
 
 	++NumScopedGames;
@@ -106,6 +132,7 @@ FScopedGameInstance::~FScopedGameInstance()
 	if (NumScopedGames == 0)
 	{
 		CVarsGuard.Reset();
+		NetDriverTickRateAdjuster.Reset();
 	}
 }
 
@@ -356,6 +383,7 @@ void FScopedGameInstance::TickInternal(const float DeltaSeconds, const ELevelTic
 		const FGWorldGuard GWorldGuard;
 
 		Game->GetEngine()->TickWorldTravel(*Game->GetWorldContext(), DeltaSeconds);
+		// TODO: Can this BlockTillLevelStreamingCompleted be replaced with ProcessAsyncLoading?
 		Game->GetWorld()->BlockTillLevelStreamingCompleted();
 		Game->GetWorld()->Tick(TickType, DeltaSeconds);
 	}
@@ -498,9 +526,12 @@ FScopedGame::FScopedGame()
 		GameInstanceClass = UGameInstance::StaticClass();
 	}
 
-	// Client runs DNS lookup in separate thread without any way to wait for it (except sleeping real time)
+	// Client runs DNS lookup in a separate thread without any way to wait for it (except sleeping real time)
 	// So just disable it for now because we know that we connect via IP address
 	WithConsoleVariable(TEXT("net.IpConnectionDisableResolution"), TEXT("1"));
+
+	(void)WithConsoleVariable(TEXT("net.DisableBandwithThrottling"), TEXT("1"));
+	(void)WithConsoleVariable(TEXT("net.DisableRandomNetUpdateDelay"), TEXT("1"));
 }
 
 FScopedGameInstance FScopedGame::Create() const
