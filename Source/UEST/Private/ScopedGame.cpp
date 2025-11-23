@@ -160,17 +160,17 @@ int32 FScopedGameInstance::FindFreePIEInstance()
 	}
 
 	int32 Result = 0;
-	
+
 	while (UsedPIEIndices.Contains(Result))
 	{
 		++Result;
 	}
-	
+
 	return Result;
 }
 
 UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FString MapToLoad, const bool bWaitForConnect)
-{	
+{
 	const auto PIEInstance = FindFreePIEInstance();
 	if (!ensureAlwaysMsgf(PIEInstance < 10, TEXT("Attempt to create too many games at the same time! See MAX_PIE_INSTANCES in Unreal Engine")))
 	{

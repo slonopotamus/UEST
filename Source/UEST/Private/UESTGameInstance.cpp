@@ -6,7 +6,7 @@
 // Source: https://ledas.com/post/857-how-to-hack-c-with-templates-and-friends/
 static FWorldContext*& FieldGetter(UGameInstance&);
 
-template<typename T, auto T::*Field, typename RetVal>
+template<typename T, auto T::* Field, typename RetVal>
 struct Stealer
 {
 	friend RetVal& FieldGetter(T& Object)
