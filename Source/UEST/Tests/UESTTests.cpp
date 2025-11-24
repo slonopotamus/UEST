@@ -32,6 +32,7 @@ TEST(UEST, SimpleTest)
 
 	ASSERT_THAT(FVector::ZeroVector, Is::NearlyEqualTo<FVector, double>(FVector::OneVector, 1.));
 	ASSERT_THAT(FVector::ZeroVector, Is::Not::NearlyEqualTo<FVector, double>(FVector::OneVector, 0.5));
+	ASSERT_THAT(FRotator::ZeroRotator, Is::NearlyEqualTo<FRotator, double>(FRotator{1, 0, 0}, 2.));
 
 	ASSERT_THAT(42, Is::LessThan<int>(43));
 	ASSERT_THAT(42, Is::Not::LessThan<int>(41));

@@ -158,6 +158,12 @@ namespace UEST
 			}
 
 			template<typename>
+			bool Matches(const FRotator& Value) const
+			{
+				return Value.Equals(Expected, Tolerance);
+			}
+
+			template<typename>
 			bool Matches(const float& Value) const
 			{
 				return FMath::IsNearlyEqual(Value, Expected, Tolerance);

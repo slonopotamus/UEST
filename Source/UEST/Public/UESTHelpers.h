@@ -62,3 +62,8 @@ static FString ToString(const FVector& Value)
 {
 	return Value.ToString();
 }
+
+static FString ToString(const FRotator& Value)
+{
+	return Value.ToString();
+}
