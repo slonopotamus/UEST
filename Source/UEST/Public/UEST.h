@@ -1,6 +1,11 @@
 #pragma once
 
+#if ENGINE_MAJOR_VERSION > 5 || ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 7
+#include "DataStorage/CommonTypes.h"
+#else
 #include "Elements/Common/TypedElementCommonTypes.h"
+#endif
+
 #include "Misc/AutomationTest.h"
 
 // TODO: Get rid of Boost
