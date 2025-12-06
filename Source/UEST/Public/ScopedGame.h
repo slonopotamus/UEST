@@ -69,7 +69,7 @@ public:
 
 	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, FString MapToLoad = TEXT(""), bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
-	UGameInstance* CreateClientFor(const UGameInstance* Server, const bool bWaitForConnect = true) UE_LIFETIMEBOUND;
+	UGameInstance* CreateClientFor(const UGameInstance& Server, const bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
 	bool DestroyGame(UGameInstance* Game);
 

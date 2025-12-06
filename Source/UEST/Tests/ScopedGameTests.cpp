@@ -15,14 +15,14 @@ TEST(UEST, ScopedGame, Simple)
 	ASSERT_THAT(Server->GetWorld()->GetNetMode(), Is::EqualTo<ENetMode>(NM_DedicatedServer));
 
 	// You can connect a client to it
-	UGameInstance* Client = Tester.CreateClientFor(Server);
+	UGameInstance* Client = Tester.CreateClientFor(*Server);
 	ASSERT_THAT(Client, Is::Not::Null);
 
 	// Actually, you can connect as many clients as you want!
 	// Well, almost. Max number of simultaneous game instances is 10, see MAX_PIE_INSTANCES in UE sources.
 	for (int32 Index = 0; Index < FMath::Min(4, Server->GetWorld()->GetAuthGameMode()->GameSession->MaxPlayers - 1); ++Index)
 	{
-		Tester.CreateClientFor(Server);
+		Tester.CreateClientFor(*Server);
 	}
 
 	// You can access game worlds
@@ -63,7 +63,7 @@ TEST(UEST, ScopedGame, CheckNetMode)
 	const auto ServerNetMode = ServerWorld->GetNetMode();
 	ASSERT_THAT(ServerNetMode, Is::EqualTo<ENetMode>(NM_DedicatedServer));
 
-	UGameInstance* Client = Tester.CreateClientFor(Server);
+	UGameInstance* Client = Tester.CreateClientFor(*Server);
 	ASSERT_THAT(Client, Is::Not::Null);
 
 	UWorld* ClientWorld = Client->GetWorld();
