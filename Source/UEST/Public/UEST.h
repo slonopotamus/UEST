@@ -529,7 +529,7 @@ struct TUESTInstantiator
 #define UEST_CLASS_NAME_1(a) a
 #define UEST_CLASS_NAME_2(a, b) a##_##b
 #define UEST_CLASS_NAME_3(a, b, c) a##_##b##_##c
-#define UEST_CLASS_NAME_4(a, b, c, d) a##_##b##_##c##_##e
+#define UEST_CLASS_NAME_4(a, b, c, d) a##_##b##_##c##_##d
 #define UEST_CLASS_NAME_5(a, b, c, d, e) a##_##b##_##c##_##d##_##e
 #define UEST_CLASS_NAME(...) UE_JOIN(UEST_CLASS_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
