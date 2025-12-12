@@ -6,7 +6,6 @@ public class UEST : ModuleRules
 	{
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Boost",
 			"Core",
 			"CoreUObject",
 			"Engine",

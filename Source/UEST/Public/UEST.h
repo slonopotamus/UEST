@@ -8,11 +8,6 @@
 
 #include "Misc/AutomationTest.h"
 
-// TODO: Get rid of Boost
-#include <boost/preprocessor/comparison/greater.hpp>
-#include <boost/preprocessor/seq/fold_left.hpp>
-#include <boost/preprocessor/variadic/to_seq.hpp>
-
 namespace UEST
 {
 	template<typename M, typename... P>
@@ -521,17 +516,22 @@ struct TUESTInstantiator
 #endif
 };
 
-#define UEST_CONCAT_SEQ_1(seq, fold_op, elem_op) elem_op(BOOST_PP_SEQ_HEAD(seq))
-#define UEST_CONCAT_SEQ_N(seq, fold_op, elem_op) BOOST_PP_SEQ_FOLD_LEFT(fold_op, elem_op(BOOST_PP_SEQ_HEAD(seq)), BOOST_PP_SEQ_TAIL(seq))
-#define UEST_CONCAT_SEQ(seq, fold_op, elem_op) BOOST_PP_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE(seq), 1), UEST_CONCAT_SEQ_N, UEST_CONCAT_SEQ_1)(seq, fold_op, elem_op)
+#define UEST_COUNT_VARARGS_N(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+#define UEST_COUNT_VARARGS(...) UEST_COUNT_VARARGS_N(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 
-#define UEST_PRETTY_NAME_ELEM_OP(x) UE_STRINGIZE(x)
-#define UEST_PRETTY_NAME_FOLD_OP(s, state, x) state "." UEST_PRETTY_NAME_ELEM_OP(x)
-#define UEST_PRETTY_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_PRETTY_NAME_FOLD_OP, UEST_PRETTY_NAME_ELEM_OP)
+#define UEST_PRETTY_NAME_1(a) UE_STRINGIZE(a)
+#define UEST_PRETTY_NAME_2(a, b) UE_STRINGIZE(a) "." UE_STRINGIZE(b)
+#define UEST_PRETTY_NAME_3(a, b, c) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c)
+#define UEST_PRETTY_NAME_4(a, b, c, d) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d)
+#define UEST_PRETTY_NAME_5(a, b, c, d, e) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e)
+#define UEST_PRETTY_NAME(...) UE_JOIN(UEST_PRETTY_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
-#define UEST_CLASS_NAME_ELEM_OP(x) x
-#define UEST_CLASS_NAME_FOLD_OP(s, state, x) UE_JOIN(state, UE_JOIN(_, x))
-#define UEST_CLASS_NAME(...) UEST_CONCAT_SEQ(BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__), UEST_CLASS_NAME_FOLD_OP, UEST_CLASS_NAME_ELEM_OP)
+#define UEST_CLASS_NAME_1(a) a
+#define UEST_CLASS_NAME_2(a, b) a##_##b
+#define UEST_CLASS_NAME_3(a, b, c) a##_##b##_##c
+#define UEST_CLASS_NAME_4(a, b, c, d) a##_##b##_##c##_##e
+#define UEST_CLASS_NAME_5(a, b, c, d, e) a##_##b##_##c##_##d##_##e
+#define UEST_CLASS_NAME(...) UE_JOIN(UEST_CLASS_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
 #if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
 #define UEST_GET_TEST_FLAGS_RETURN_TYPE EAutomationTestFlags
