@@ -524,6 +524,11 @@ struct TUESTInstantiator
 #define UEST_PRETTY_NAME_3(a, b, c) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c)
 #define UEST_PRETTY_NAME_4(a, b, c, d) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d)
 #define UEST_PRETTY_NAME_5(a, b, c, d, e) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e)
+#define UEST_PRETTY_NAME_6(a, b, c, d, e, f) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e) "." UE_STRINGIZE(f)
+#define UEST_PRETTY_NAME_7(a, b, c, d, e, f, g) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e) "." UE_STRINGIZE(f) "." UE_STRINGIZE(g)
+#define UEST_PRETTY_NAME_8(a, b, c, d, e, f, g, h) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e) "." UE_STRINGIZE(f) "." UE_STRINGIZE(g) "." UE_STRINGIZE(h)
+#define UEST_PRETTY_NAME_9(a, b, c, d, e, f, g, h, i) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e) "." UE_STRINGIZE(f) "." UE_STRINGIZE(g) "." UE_STRINGIZE(h) "." UE_STRINGIZE(i)
+#define UEST_PRETTY_NAME_10(a, b, c, d, e, f, g, h, i, j) UE_STRINGIZE(a) "." UE_STRINGIZE(b) "." UE_STRINGIZE(c) "." UE_STRINGIZE(d) "." UE_STRINGIZE(e) "." UE_STRINGIZE(f) "." UE_STRINGIZE(g) "." UE_STRINGIZE(h) "." UE_STRINGIZE(i) "." UE_STRINGIZE(j)
 #define UEST_PRETTY_NAME(...) UE_JOIN(UEST_PRETTY_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
 #define UEST_CLASS_NAME_1(a) a
@@ -531,6 +536,11 @@ struct TUESTInstantiator
 #define UEST_CLASS_NAME_3(a, b, c) a##_##b##_##c
 #define UEST_CLASS_NAME_4(a, b, c, d) a##_##b##_##c##_##d
 #define UEST_CLASS_NAME_5(a, b, c, d, e) a##_##b##_##c##_##d##_##e
+#define UEST_CLASS_NAME_6(a, b, c, d, e, f) a##_##b##_##c##_##d##_##e##f
+#define UEST_CLASS_NAME_7(a, b, c, d, e, f, g) a##_##b##_##c##_##d##_##e##f##g
+#define UEST_CLASS_NAME_8(a, b, c, d, e, f, g, h) a##_##b##_##c##_##d##_##e##f##g##h
+#define UEST_CLASS_NAME_9(a, b, c, d, e, f, g, h, i) a##_##b##_##c##_##d##_##e##f##g##h##i
+#define UEST_CLASS_NAME_10(a, b, c, d, e, f, g, h, i, j) a##_##b##_##c##_##d##_##e##f##g##h##i##j
 #define UEST_CLASS_NAME(...) UE_JOIN(UEST_CLASS_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
 #if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
