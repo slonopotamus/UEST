@@ -1,9 +1,11 @@
 #pragma once
 
-#if ENGINE_MAJOR_VERSION > 5 || ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 7
-#include "DataStorage/CommonTypes.h"
-#else
+#include "Misc/EngineVersionComparison.h"
+
+#if UE_VERSION_OLDER_THAN(5, 7, 0)
 #include "Elements/Common/TypedElementCommonTypes.h"
+#else
+#include "DataStorage/CommonTypes.h"
 #endif
 
 #include "Misc/AutomationTest.h"
@@ -543,10 +545,10 @@ struct TUESTInstantiator
 #define UEST_CLASS_NAME_10(a, b, c, d, e, f, g, h, i, j) a##_##b##_##c##_##d##_##e##f##g##h##i##j
 #define UEST_CLASS_NAME(...) UE_JOIN(UEST_CLASS_NAME_, UEST_COUNT_VARARGS(__VA_ARGS__))(__VA_ARGS__)
 
-#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5)
-#define UEST_GET_TEST_FLAGS_RETURN_TYPE EAutomationTestFlags
-#else
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
 #define UEST_GET_TEST_FLAGS_RETURN_TYPE uint32
+#else
+#define UEST_GET_TEST_FLAGS_RETURN_TYPE EAutomationTestFlags
 #endif
 
 #define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, ClassName, PrettyName) \

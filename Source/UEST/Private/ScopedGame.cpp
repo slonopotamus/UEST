@@ -4,10 +4,13 @@
 #include "GameMapsSettings.h"
 #include "Iris/ReplicationSystem/ObjectReplicationBridge.h"
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Net/OnlineEngineInterface.h"
-#if ENGINE_MAJOR_VERSION > 5 || ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+
+#if !UE_VERSION_OLDER_THAN(5, 3, 0)
 #include "Runtime/Core/Internal/Misc/PlayInEditorLoadingScope.h"
 #endif
+
 #include "UESTGameInstance.h"
 #include "UESTHelpers.h"
 
@@ -133,7 +136,7 @@ FScopedGameInstance::~FScopedGameInstance()
 	}
 }
 
-#if ENGINE_MAJOR_VERSION > 5 || ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#if !UE_VERSION_OLDER_THAN(5, 3, 0)
 struct FGPlayInEditorIDGuard final : UE::Core::Private::FPlayInEditorLoadingScope
 {
 	explicit FGPlayInEditorIDGuard(const int32 PlayInEditorID)
@@ -326,15 +329,15 @@ void FScopedGameInstance::DestroyGameInternal(UGameInstance& Game)
 		}
 	}
 
-#if ENGINE_MAJOR_VERSION > 5 || ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 5
-	World->EndPlay(EEndPlayReason::EndPlayInEditor);
-#else
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 	World->BeginTearingDown();
 
 	for (FActorIterator ActorIt(World); ActorIt; ++ActorIt)
 	{
 		ActorIt->RouteEndPlay(EEndPlayReason::EndPlayInEditor);
 	}
+#else
+	World->EndPlay(EEndPlayReason::EndPlayInEditor);
 #endif
 
 	Game.GetEngine()->ShutdownWorldNetDriver(World);
