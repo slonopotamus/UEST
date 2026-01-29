@@ -1,21 +1,9 @@
 ﻿#pragma once
 
 template<typename T>
-static typename TEnableIf<TIsEnumClass<T>::Value, FString>::Type ToString(T Value)
+static TEnableIf<TIsEnumClass<T>::Value, FString>::Type ToString(T Value)
 {
 	return StaticEnum<T>()->GetNameStringByValue(static_cast<int64>(Value));
-}
-
-template<typename T>
-static FString ToString(const T* Value)
-{
-	return Value ? ToString(Value) : TEXT("nullptr");
-}
-
-template<typename T>
-static FString ToString(const TSharedPtr<T>& Value)
-{
-	return Value ? ToString(Value.Get()) : TEXT("nullptr");
 }
 
 static FString ToString(FString Value)
@@ -53,9 +41,9 @@ static FString ToString(const uint64 Value)
 	return FString::Printf(TEXT("%llu"), Value);
 }
 
-static FString ToString(const UObject* Value)
+static FString ToString(const UObject& Value)
 {
-	return GetPathNameSafe(Value);
+	return GetPathNameSafe(&Value);
 }
 
 static FString ToString(const FVector& Value)
@@ -66,4 +54,22 @@ static FString ToString(const FVector& Value)
 static FString ToString(const FRotator& Value)
 {
 	return Value.ToString();
+}
+
+template<typename T>
+static FString ToString(const T* Value)
+{
+	return Value ? ToString(*Value) : TEXT("nullptr");
+}
+
+template<typename T>
+static FString ToString(const TSharedPtr<T>& Value)
+{
+	return Value ? ToString(Value.Get()) : TEXT("nullptr");
+}
+
+template<typename T>
+static FString ToString(const TObjectPtr<T>& Value)
+{
+	return ToString(Value.Get());
 }
