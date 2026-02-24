@@ -555,7 +555,7 @@ FScopedGame& FScopedGame::WithGameInstance(TSubclassOf<UGameInstance> InGameInst
 
 FScopedGame& FScopedGame::WithConsoleVariable(const FString& Name, FString Value, const bool bReportNonexistentVariable)
 {
-	if (auto* Variable = IConsoleManager::Get().FindConsoleVariable(*Name); Variable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *Name))
+	if (auto* Variable = IConsoleManager::Get().FindConsoleVariable(*Name); Variable || bReportNonexistentVariable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *Name))
 	{
 		CVars.Emplace(Variable, MoveTemp(Value));
 	}
