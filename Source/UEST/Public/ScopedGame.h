@@ -44,7 +44,7 @@ class UEST_API FScopedGameInstance : FNoncopyable
 
 	static void DestroyGameInternal(UGameInstance& Game);
 
-	void TickInternal(float DeltaSeconds, const ELevelTick TickType);
+	void TickInternal(float DeltaSeconds, ELevelTick TickType);
 
 	[[nodiscard]] static UObject* StaticFindReplicatedObjectIn(UObject* Object, const UWorld* World);
 
@@ -55,13 +55,7 @@ class UEST_API FScopedGameInstance : FNoncopyable
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;
 
-	struct FCVarConfig
-	{
-		FString Value;
-		bool bReportNonexistentVariable = true;
-	};
-
-	[[nodiscard]] explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars);
+	[[nodiscard]] explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<IConsoleVariable*, FString>& CVars);
 
 	[[nodiscard]] FScopedGameInstance(FScopedGameInstance&& Other);
 
@@ -69,7 +63,7 @@ public:
 
 	UGameInstance* CreateGame(EScopedGameType Type = EScopedGameType::Client, FString MapToLoad = TEXT(""), bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
-	UGameInstance* CreateClientFor(const UGameInstance& Server, const bool bWaitForConnect = true) UE_LIFETIMEBOUND;
+	UGameInstance* CreateClientFor(const UGameInstance& Server, bool bWaitForConnect = true) UE_LIFETIMEBOUND;
 
 	bool DestroyGame(UGameInstance* Game);
 
@@ -91,26 +85,14 @@ public:
 class UEST_API FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
-	TMap<FString, FScopedGameInstance::FCVarConfig> CVars;
+	TMap<IConsoleVariable*, FString> CVars;
 
 public:
 	[[nodiscard]] FScopedGame();
 
-	[[nodiscard]] FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass) UE_LIFETIMEBOUND
-	{
-		if (ensure(InGameInstanceClass))
-		{
-			GameInstanceClass = MoveTemp(InGameInstanceClass);
-		}
+	[[nodiscard]] FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass) UE_LIFETIMEBOUND;
 
-		return *this;
-	}
-
-	[[nodiscard]] FScopedGame& WithConsoleVariable(FString Name, FString Value, const bool bReportNonexistentVariable = true) UE_LIFETIMEBOUND
-	{
-		CVars.Emplace(MoveTemp(Name), {MoveTemp(Value), bReportNonexistentVariable});
-		return *this;
-	}
+	[[nodiscard]] FScopedGame& WithConsoleVariable(const FString& Name, FString Value, const bool bReportNonexistentVariable = true) UE_LIFETIMEBOUND;
 
 	[[nodiscard]] FScopedGameInstance Create() const;
 };

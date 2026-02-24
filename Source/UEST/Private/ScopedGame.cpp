@@ -31,26 +31,20 @@ struct FGWorldGuard final : FNoncopyable
 
 struct FCVarGuard final : FNoncopyable
 {
-	explicit FCVarGuard(const FString& CVarName, const FScopedGameInstance::FCVarConfig& CVarConfig)
-	    : Variable{IConsoleManager::Get().FindConsoleVariable(*CVarName)}
-	    , OldValue{Variable ? Variable->GetString() : TEXT("")}
+	explicit FCVarGuard(IConsoleVariable& Variable, const FString& Value)
+	    : Variable{Variable}
+	    , OldValue{Variable.GetString()}
 	{
-		if (Variable || (CVarConfig.bReportNonexistentVariable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *CVarName)))
-		{
-			Variable->Set(*CVarConfig.Value);
-		}
+		Variable.Set(*Value);
 	}
 
 	~FCVarGuard()
 	{
-		if (Variable)
-		{
-			Variable->Set(*OldValue);
-		}
+		Variable.Set(*OldValue);
 	}
 
 private:
-	IConsoleVariable* Variable;
+	IConsoleVariable& Variable;
 	const FString OldValue;
 };
 
@@ -87,16 +81,19 @@ private:
 
 static TUniquePtr<FNetDriverTickRateAdjuster> NetDriverTickRateAdjuster;
 
-FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<FString, FCVarConfig>& CVars)
+FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<IConsoleVariable*, FString>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
 {
 	if (NumScopedGames == 0)
 	{
 		CVarsGuard = MakeUnique<FCVarsGuard>();
 
-		for (const auto& [CVarName, CVarConfig] : CVars)
+		for (const auto& [Variable, Value] : CVars)
 		{
-			CVarsGuard->ConsoleVariableGuards.Emplace(CVarName, CVarConfig);
+			if (ensure(Variable))
+			{
+				CVarsGuard->ConsoleVariableGuards.Emplace(*Variable, Value);
+			}
 		}
 
 		NetDriverTickRateAdjuster = MakeUnique<FNetDriverTickRateAdjuster>();
@@ -544,6 +541,26 @@ FScopedGame::FScopedGame()
 
 	(void)WithConsoleVariable(TEXT("net.DisableBandwithThrottling"), TEXT("1"));
 	(void)WithConsoleVariable(TEXT("net.DisableRandomNetUpdateDelay"), TEXT("1"));
+}
+
+FScopedGame& FScopedGame::WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass)
+{
+	if (ensure(InGameInstanceClass))
+	{
+		GameInstanceClass = MoveTemp(InGameInstanceClass);
+	}
+
+	return *this;
+}
+
+FScopedGame& FScopedGame::WithConsoleVariable(const FString& Name, FString Value, const bool bReportNonexistentVariable)
+{
+	if (auto* Variable = IConsoleManager::Get().FindConsoleVariable(*Name); Variable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *Name))
+	{
+		CVars.Emplace(Variable, MoveTemp(Value));
+	}
+
+	return *this;
 }
 
 FScopedGameInstance FScopedGame::Create() const
