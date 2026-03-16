@@ -81,8 +81,9 @@ private:
 
 static TUniquePtr<FNetDriverTickRateAdjuster> NetDriverTickRateAdjuster;
 
-FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<IConsoleVariable*, FString>& CVars)
+FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const EWorldType::Type WorldType, const TMap<IConsoleVariable*, FString>& CVars)
     : GameInstanceClass{MoveTemp(GameInstanceClass)}
+    , WorldType{WorldType}
 {
 	if (NumScopedGames == 0)
 	{
@@ -104,6 +105,7 @@ FScopedGameInstance::FScopedGameInstance(TSubclassOf<UGameInstance> GameInstance
 
 FScopedGameInstance::FScopedGameInstance(FScopedGameInstance&& Other)
     : GameInstanceClass{MoveTemp(Other.GameInstanceClass)}
+    , WorldType{Other.WorldType}
     , Games{MoveTemp(Other.Games)}
 {
 	++NumScopedGames;
@@ -193,11 +195,11 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FStri
 	const auto bRunAsDedicated = Type == EScopedGameType::Server;
 	if (auto* TestableGame = Cast<IUESTGameInstance>(Game))
 	{
-		TestableGame->InitializeForTests(bRunAsDedicated, PIEInstance);
+		TestableGame->InitializeForTests(WorldType, bRunAsDedicated, PIEInstance);
 	}
 	else
 	{
-		IUESTGameInstance::DefaultInitializeForTests(*Game, bRunAsDedicated, PIEInstance);
+		IUESTGameInstance::DefaultInitializeForTests(*Game, WorldType, bRunAsDedicated, PIEInstance);
 	}
 
 	auto* WorldContext = Game->GetWorldContext();
@@ -528,6 +530,7 @@ bool FScopedGameInstance::TickUntil(const TFunctionRef<bool()>& Condition, const
 }
 
 FScopedGame::FScopedGame()
+    : WorldType{WITH_EDITOR ? EWorldType::PIE : EWorldType::Game}
 {
 	GameInstanceClass = GetDefault<UGameMapsSettings>()->GameInstanceClass.TryLoadClass<UGameInstance>();
 	if (!GameInstanceClass)
@@ -553,6 +556,12 @@ FScopedGame& FScopedGame::WithGameInstance(TSubclassOf<UGameInstance> InGameInst
 	return *this;
 }
 
+FScopedGame& FScopedGame::WithWorldType(const EWorldType::Type InWorldType)
+{
+	WorldType = InWorldType;
+	return *this;
+}
+
 FScopedGame& FScopedGame::WithConsoleVariable(const FString& Name, FString Value, const bool bReportNonexistentVariable)
 {
 	if (auto* Variable = IConsoleManager::Get().FindConsoleVariable(*Name); Variable || bReportNonexistentVariable && ensureAlwaysMsgf(Variable, TEXT("Console variable not found: %s"), *Name))
@@ -565,5 +574,5 @@ FScopedGame& FScopedGame::WithConsoleVariable(const FString& Name, FString Value
 
 FScopedGameInstance FScopedGame::Create() const
 {
-	return FScopedGameInstance{GameInstanceClass, CVars};
+	return FScopedGameInstance{GameInstanceClass, WorldType, CVars};
 }

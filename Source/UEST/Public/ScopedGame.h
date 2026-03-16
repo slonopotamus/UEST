@@ -40,6 +40,8 @@ class UEST_API FScopedGameInstance : FNoncopyable
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
 
+	EWorldType::Type WorldType;
+
 	TArray<TStrongObjectPtr<UGameInstance>> Games;
 
 	static void DestroyGameInternal(UGameInstance& Game);
@@ -55,7 +57,7 @@ class UEST_API FScopedGameInstance : FNoncopyable
 public:
 	static constexpr auto DefaultStepSeconds = 0.1f;
 
-	[[nodiscard]] explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, const TMap<IConsoleVariable*, FString>& CVars);
+	[[nodiscard]] explicit FScopedGameInstance(TSubclassOf<UGameInstance> GameInstanceClass, EWorldType::Type WorldType, const TMap<IConsoleVariable*, FString>& CVars);
 
 	[[nodiscard]] FScopedGameInstance(FScopedGameInstance&& Other);
 
@@ -85,12 +87,17 @@ public:
 class UEST_API FScopedGame
 {
 	TSubclassOf<UGameInstance> GameInstanceClass;
+
+	EWorldType::Type WorldType;
+
 	TMap<IConsoleVariable*, FString> CVars;
 
 public:
 	[[nodiscard]] FScopedGame();
 
 	[[nodiscard]] FScopedGame& WithGameInstance(TSubclassOf<UGameInstance> InGameInstanceClass) UE_LIFETIMEBOUND;
+
+	[[nodiscard]] FScopedGame& WithWorldType(EWorldType::Type InWorldType) UE_LIFETIMEBOUND;
 
 	[[nodiscard]] FScopedGame& WithConsoleVariable(const FString& Name, FString Value, const bool bReportNonexistentVariable = true) UE_LIFETIMEBOUND;
 

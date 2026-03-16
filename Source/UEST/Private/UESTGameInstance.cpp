@@ -6,7 +6,7 @@
 // Source: https://ledas.com/post/857-how-to-hack-c-with-templates-and-friends/
 static FWorldContext*& FieldGetter(UGameInstance&);
 
-template<typename T, auto T::*Field, typename RetVal>
+template<typename T, auto T::* Field, typename RetVal>
 struct Stealer
 {
 	friend RetVal& FieldGetter(T& Object)
@@ -17,10 +17,8 @@ struct Stealer
 
 template struct Stealer<UGameInstance, &UGameInstance::WorldContext, FWorldContext*>;
 
-void IUESTGameInstance::DefaultInitializeForTests(UGameInstance& GameInstance, const bool bRunAsDedicated, const int32 PIEInstance)
+void IUESTGameInstance::DefaultInitializeForTests(UGameInstance& GameInstance, const EWorldType::Type WorldType, const bool bRunAsDedicated, const int32 PIEInstance)
 {
-	constexpr auto WorldType = WITH_EDITOR ? EWorldType::PIE : EWorldType::Game;
-
 	auto& WorldContext = GameInstance.GetEngine()->CreateNewWorldContext(WorldType);
 	WorldContext.OwningGameInstance = &GameInstance;
 	WorldContext.PIEInstance = PIEInstance;
