@@ -469,24 +469,6 @@ class UEST_API FUESTTestBase : public FAutomationTestBase
 {
 	typedef FAutomationTestBase Super;
 
-protected:
-	FUESTTestBase(const FString& InName, bool bIsComplex);
-
-	virtual uint32 GetRequiredDeviceNum() const override;
-
-	virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override;
-
-	virtual FString GetTestSourceFileName(const FString& InTestName) const override;
-
-	virtual int32 GetTestSourceFileLine(const FString& InTestName) const override;
-
-	virtual bool RunTest(const FString& InTestName) override;
-
-	virtual void Setup() {}
-
-	virtual void TearDown() {}
-
-public:
 	struct FTestMethodInfo final
 	{
 		TFunctionRef<void()> Func;
@@ -495,18 +477,36 @@ public:
 	};
 
 	TMap<FString, FTestMethodInfo> TestMethods;
-};
 
-struct FUESTMethodRegistrar
-{
-	FUESTMethodRegistrar(FUESTTestBase& Test, const TCHAR* Name, FUESTTestBase::FTestMethodInfo&& Info)
+protected:
+	FUESTTestBase(const FString& InName, bool bIsComplex);
+
+	virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override;
+
+	virtual bool RunTest(const FString& InTestName) override;
+
+	virtual void Setup() {}
+
+	virtual void TearDown() {}
+
+	struct FUESTMethodRegistrar final : FNoncopyable
 	{
-		Test.TestMethods.Emplace(Name, MoveTemp(Info));
-	}
+		FUESTMethodRegistrar(FUESTTestBase& Test, const TCHAR* Name, FTestMethodInfo&& Info)
+		{
+			Test.TestMethods.Emplace(Name, MoveTemp(Info));
+		}
+	};
+
+public:
+	virtual uint32 GetRequiredDeviceNum() const override;
+
+	virtual FString GetTestSourceFileName(const FString& InTestName) const override;
+
+	virtual int32 GetTestSourceFileLine(const FString& InTestName) const override;
 };
 
 template<typename TClass>
-struct TUESTInstantiator
+struct TUESTInstantiator final : FNoncopyable
 {
 #if WITH_AUTOMATION_WORKER
 	TUESTInstantiator()
