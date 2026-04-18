@@ -551,12 +551,13 @@ struct TUESTInstantiator final : FNoncopyable
 #endif
 
 #define TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, ClassName, PrettyName) \
-	struct UE_JOIN(F, UE_JOIN(ClassName, Impl)); \
-	struct UE_JOIN(F, ClassName) \
+	class UE_JOIN(F, UE_JOIN(ClassName, Impl)); \
+	class UE_JOIN(F, ClassName) \
 	    : public BaseClass \
 	{ \
-		typedef UE_JOIN(F, UE_JOIN(ClassName, Impl)) ThisClass; \
-		typedef BaseClass Super; \
+	protected: \
+		using ThisClass = UE_JOIN(F, UE_JOIN(ClassName, Impl)); \
+		using Super = BaseClass; \
 		UE_JOIN(F, ClassName) \
 		() \
 		    : Super(TEXT(PrettyName), bIsComplex) \
@@ -564,6 +565,8 @@ struct TUESTInstantiator final : FNoncopyable
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
+\
+	public: \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
 			return TEXT(PrettyName); \
@@ -584,7 +587,7 @@ struct TUESTInstantiator final : FNoncopyable
 		} \
 	}; \
 	static const TUESTInstantiator<UE_JOIN(F, UE_JOIN(ClassName, Impl))> UE_JOIN(ClassName, Instantiator); \
-	struct UE_JOIN(F, UE_JOIN(ClassName, Impl)) \
+	class UE_JOIN(F, UE_JOIN(ClassName, Impl)) \
 	    : public UE_JOIN(F, ClassName)
 
 #define TEST_CLASS_WITH_BASE(BaseClass, bIsComplex, Flags, ...) TEST_CLASS_WITH_BASE_IMPL(BaseClass, bIsComplex, Flags, UEST_CLASS_NAME(__VA_ARGS__), UEST_PRETTY_NAME(__VA_ARGS__))
@@ -592,12 +595,13 @@ struct TUESTInstantiator final : FNoncopyable
 #define TEST_WITH_BASE(BaseClass, Flags, ...) \
 	TEST_CLASS_WITH_BASE(BaseClass, false, Flags, __VA_ARGS__) \
 	{ \
+		void DoTest(const FString& Parameters); \
+	protected: \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
 			DoTest(Parameters); \
 			return true; \
 		} \
-		void DoTest(const FString& Parameters); \
 		/* clang-format off */ \
 	}; \
 	/* clang-format on */ \
