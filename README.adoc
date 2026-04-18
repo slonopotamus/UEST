@@ -246,7 +246,6 @@ Also, almost nobody wants to use custom flags.
 If test reports an error, it should be marked as failing.
 If there are no errors, it should be marked as successful.
 This bool adds a completely useless (and even harmful) way to *fail without a message*.
-* Nontrivial assertions (like `UTEST_EQUAL_EXPR`) are unable to print exact values of actual/expected.
 * Inadequate support for async tests.
 As soon as something becomes async, test body transforms into `ADD_LATENT_AUTOMATION_COMMAND` monster without an easy way of passing data between commands.
 
