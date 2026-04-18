@@ -564,8 +564,6 @@ struct TUESTInstantiator
 		} \
 		/* This using is needed so Rider understands that we are a runnable test */ \
 		using Super::RunTest; \
-		/* TODO: Only add this when bIsComplex is true */ \
-		virtual void GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const override; \
 		virtual FString GetBeautifiedTestName() const override \
 		{ \
 			return TEXT(PrettyName); \
@@ -585,10 +583,6 @@ struct TUESTInstantiator
 			return __LINE__; \
 		} \
 	}; \
-	void UE_JOIN(F, ClassName)::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const \
-	{ \
-		Super::GetTests(OutBeautifiedNames, OutTestCommands); \
-	} \
 	static const TUESTInstantiator<UE_JOIN(F, UE_JOIN(ClassName, Impl))> UE_JOIN(ClassName, Instantiator); \
 	struct UE_JOIN(F, UE_JOIN(ClassName, Impl)) \
 	    : public UE_JOIN(F, ClassName)
