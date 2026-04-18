@@ -489,20 +489,19 @@ protected:
 public:
 	struct FTestMethodInfo final
 	{
-		FSimpleDelegate Delegate;
+		TFunctionRef<void()> Func;
 		const TCHAR* FileName;
 		const int32 FileLine;
 	};
 
-	// TODO: Can we do this without delegates, just using method pointers?
 	TMap<FString, FTestMethodInfo> TestMethods;
 };
 
 struct FUESTMethodRegistrar
 {
-	FUESTMethodRegistrar(FUESTTestBase& Test, FString&& Name, FUESTTestBase::FTestMethodInfo&& Info)
+	FUESTMethodRegistrar(FUESTTestBase& Test, const TCHAR* Name, FUESTTestBase::FTestMethodInfo&& Info)
 	{
-		Test.TestMethods.Add(MoveTemp(Name), MoveTemp(Info));
+		Test.TestMethods.Emplace(Name, MoveTemp(Info));
 	}
 };
 
@@ -649,7 +648,7 @@ struct TUESTInstantiator
 #define TEST_CLASS_DISABLED(...) TEST_CLASS_WITH_BASE(FUESTTestBase, true, EAutomationTestFlags::Disabled, __VA_ARGS__)
 
 #define TEST_METHOD(MethodName) \
-	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {FSimpleDelegate::CreateRaw(this, &ThisClass::MethodName), TEXT(__FILE__), __LINE__}}; \
+	FUESTMethodRegistrar reg##MethodName{*this, TEXT(#MethodName), {[this] { MethodName(); }, TEXT(__FILE__), __LINE__}}; \
 	void MethodName()
 
 #define BEFORE_EACH() virtual void Setup() override

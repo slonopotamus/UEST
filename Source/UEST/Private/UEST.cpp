@@ -76,7 +76,7 @@ bool FUESTTestBase::RunTest(const FString& InTestName)
 
 			if (!HasAnyErrors())
 			{
-				TestInfo->Delegate.Execute();
+				TestInfo->Func();
 			}
 
 			TearDown();
