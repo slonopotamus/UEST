@@ -209,7 +209,33 @@ UGameInstance* FScopedGameInstance::CreateGame(const EScopedGameType Type, FStri
 		return nullptr;
 	}
 
-	ensureAlwaysMsgf(WorldContext->PIEInstance == PIEInstance, TEXT("WorldContext must use supplied PIEInstance"));
+	if (!ensureAlwaysMsgf(WorldContext->PIEInstance == PIEInstance, TEXT("WorldContext must use supplied PIEInstance")))
+	{
+		DestroyGame(Game);
+		return nullptr;
+	}
+
+	if (WorldContext->WorldType == EWorldType::PIE && !WorldContext->RunAsDedicated)
+	{
+		const auto LoggedIn = MakeShared<TOptional<bool>>();
+		FOnPIELoginComplete OnLoginComplete;
+		OnLoginComplete.BindLambda([=](int32 LocalUserNum, const bool bWasSuccessful, const FString& Error) {
+			ensureMsgf(bWasSuccessful, TEXT("Failed to login: %s"), *Error);
+			LoggedIn->Emplace(bWasSuccessful);
+		});
+
+		const auto OnlineSubsystemId = UOnlineEngineInterface::Get()->GetOnlineIdentifier(*WorldContext);
+		UOnlineEngineInterface::Get()->LoginPIEInstance(OnlineSubsystemId, 0, WorldContext->PIEInstance, OnLoginComplete);
+
+		if (!ensure(TickUntil([&] {
+			    return LoggedIn->IsSet();
+		    })) ||
+		    !ensure(LoggedIn->Get(false)))
+		{
+			DestroyGame(Game);
+			return nullptr;
+		}
+	}
 
 	if (Type == EScopedGameType::Client)
 	{

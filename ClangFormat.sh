@@ -34,7 +34,7 @@ case "${OSTYPE}" in
 			sysctl -n hw.logicalcpu
 	  	}
 		;;
-	"msys")
+	"cygwin" | "msys")
 		win_setup
 		;;
 esac

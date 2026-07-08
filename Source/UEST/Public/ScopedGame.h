@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/GameInstance.h"
+#include "ScopedGame.generated.h"
 
 enum class EScopedGameType : uint8
 {
