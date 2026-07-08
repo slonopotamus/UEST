@@ -596,6 +596,7 @@ struct TUESTInstantiator final : FNoncopyable
 	TEST_CLASS_WITH_BASE(BaseClass, false, Flags, __VA_ARGS__) \
 	{ \
 		void DoTest(const FString& Parameters); \
+\
 	protected: \
 		virtual bool RunTest(const FString& Parameters) override \
 		{ \
